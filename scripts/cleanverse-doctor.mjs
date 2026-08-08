@@ -1,3 +1,6 @@
+/**
+ * Live Cleanverse sandbox probe — docs v5.6 plain JSON endpoints only.
+ */
 import { readFileSync } from 'node:fs'
 import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -17,30 +20,74 @@ function loadEnv(path) {
   return out
 }
 
-async function post(base, apiId, body) {
+function ok(json) {
+  return json?.code === 4 || json?.code === '0000'
+}
+
+async function postPlain(base, apiId, path, body) {
   const start = Date.now()
-  const res = await fetch(`${base}/query_apass`, {
+  const res = await fetch(`${base}${path}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'api-id': apiId },
     body: JSON.stringify(body),
   })
   const json = await res.json()
-  const ok = json.code === 4 || json.code === '0000'
-  return { ok, json, ms: Date.now() - start }
+  return { json, ms: Date.now() - start, ok: ok(json) }
+}
+
+async function getPlain(base, apiId, path) {
+  const start = Date.now()
+  const res = await fetch(`${base}${path}`, { headers: { 'api-id': apiId } })
+  const json = await res.json()
+  return { json, ms: Date.now() - start, ok: ok(json) }
 }
 
 const env = loadEnv(envPath)
 const base = env.CLEANVERSE_API_BASE
 const apiId = env.CLEANVERSE_API_ID
+const walletA = '0x20a2A3cBDd040fdC24c4ebA6fE8531Dad068B7CB'
+const walletB = '0x9AE53a6d3c8E8955D1bAA660B4aBd477Fe512C2b'
+const clinv01 = '0xEae6ef4f62B735789bD0d899f5f6f2993488Fe69'
 
-const q = await post(base, apiId, { chain: 'monad', address: '0x20a2A3cBDd040fdC24c4ebA6fE8531Dad068B7CB' })
-console.log('| Endpoint | Status | ms | Fallback |')
-console.log('|----------|--------|-----|----------|')
-console.log(`| query_apass | ${q.ok ? 'OK' : q.json.code} | ${q.ms} | - |`)
-console.log(`| verify_apass | BROKEN | - | on-chain hasApass 0x7a28eae6 |`)
-console.log(`| validator/verify | BROKEN | - | local Schematron + inspect() |`)
-console.log(`| query_txs | BROKEN | - | Envio GraphQL localhost:8082 |`)
+let allOk = true
+const rows = []
 
-const list = await fetch(`${base}/atoken/list_my_atokens`, { headers: { 'api-id': apiId } })
-const listJson = await list.json()
-console.log(`| list_my_atokens | ${listJson.code === '0000' ? 'OK' : listJson.code} | - | - |`)
+function record(name, passed, ms, detail = '') {
+  rows.push({ name, status: passed ? 'PASS' : 'FAIL', ms, detail })
+  if (!passed) allOk = false
+}
+
+const q = await postPlain(base, apiId, '/query_apass', { chain: 'monad', address: walletA })
+record('query_apass', q.ok, q.ms, q.ok ? '' : String(q.json.code))
+
+const v = await postPlain(base, apiId, '/verify_apass', {
+  chain: 'monad',
+  atoken: clinv01,
+  address: walletB,
+})
+const verifyOk = v.ok && v.json?.data?.code === 4
+record('verify_apass', verifyOk, v.ms, verifyOk ? '' : String(v.json?.data?.code ?? v.json.code))
+
+const txs = await postPlain(base, apiId, '/query_txs', {
+  chain: 'monad',
+  address: walletB,
+  symbol: 'usdc',
+  page: 1,
+  pageSize: 5,
+})
+record('query_txs_usdc', txs.ok, txs.ms, txs.ok ? '' : String(txs.json.code))
+
+const list = await getPlain(base, apiId, '/atoken/list_my_atokens?page=1&page_size=5&chain=monad')
+record('list_my_atokens', list.ok, list.ms, list.ok ? '' : String(list.json.code))
+
+console.log('| Endpoint | Status | ms | Detail |')
+console.log('|----------|--------|-----|--------|')
+for (const r of rows) {
+  console.log(`| ${r.name} | ${r.status} | ${r.ms} | ${r.detail || '-'} |`)
+}
+
+if (!allOk) {
+  console.error('cleanverse:doctor FAIL')
+  process.exit(1)
+}
+console.log('cleanverse:doctor OK')

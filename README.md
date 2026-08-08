@@ -84,12 +84,17 @@ Policy v2 (`0x3d5c0027792B576C62a35C2f4E7bF17Ac54dCfbb`) is superseded — live 
 
 Full map: `services/src/reasonCodes.ts` (mirrored in `app/lib/reasonCodes.ts`)
 
+## Testing vs live testnet
+
+- **Live proofs** — `deployments/monad-10143.json`, `pnpm verify:wo08`, `pnpm seed:verify`, `pnpm cleanverse:doctor` (sandbox API), and Envio indexer (`pnpm verify:indexer`).
+- **`forge test`** — 38 in-process Foundry tests with minimal **harness** contracts (`contracts/test/*Harness*`) for isolated rule coverage; not a substitute for testnet txs.
+
 ## Honest limitations
 
 - Cleanverse `min_tier` / `is_black_list` are **API-only** — we enforce tier and OFAC on-chain.
 - Policy hook is **STATICCALL** — no on-chain denial events; `inspect()` + audit-pack denial log.
 - `eth_getLogs` capped at **100 blocks** on Monad RPC — history via Envio indexer only.
-- Broken Cleanverse UAT endpoints — `pnpm cleanverse:doctor` lists fallbacks.
+- Sandbox gaps: `validator/verify` on custom pools (`12027`), `query_txs` for custom symbols — product uses Envio indexer + on-chain `inspect()` instead; `pnpm cleanverse:doctor` probes live endpoints we call (all must PASS).
 - Frozen wallet burn blocked by BASE — see `docs/SECURITY.md` recover runbook (unfreeze → recover → re-freeze).
 - **No gasless onboarding claim** — EIP-7702 type-4 accepted; sponsored onboarding is a documented next step.
 - OFAC list: **72 real SDN EVM + 3 synthetic testnet** addresses (`seed/ofac/ofac-root.json`).

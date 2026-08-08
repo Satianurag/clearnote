@@ -9,7 +9,7 @@ If `CLEANVERSE_API_KEY` was ever included in a zip, shared chat, or non-git chan
 3. Update local files only (never commit):
    - `clearnote.keys.env` or `cleanverse.env` — `CLEANVERSE_API_ID`, `CLEANVERSE_API_KEY`
    - App dev: `app/.env.local` if used (`NEXT_PUBLIC_*` does not need the secret; server routes read from env)
-4. Verify: `pnpm cleanverse:doctor` — should return live or documented fallback, not 401.
+4. Verify: `pnpm cleanverse:doctor` — all probed endpoints should PASS (not 401).
 
 ## Git history
 

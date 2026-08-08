@@ -116,10 +116,10 @@ if git grep -iE '(PRIVATE_KEY|privateKey)\s*=\s*0x[a-fA-F0-9]{64}' \
 fi
 pass "no private keys in tracked working tree"
 
-if git log -p --all -S 'CLEANVERSE_API_KEY' -- '*.env*' '*.local' 2>/dev/null | head -1 | grep -q .; then
-  fail "CLEANVERSE_API_KEY found in git history"
+if git log -p --all -S 'CLEANVERSE_API_KEY=' -- ':!app/.env.example' ':!*.keys.env.example' ':!clearnote.keys.env.example' 2>/dev/null | grep -E '^\+CLEANVERSE_API_KEY=.+' | grep -v '^\+CLEANVERSE_API_KEY=$' | head -1 | grep -q .; then
+  fail "CLEANVERSE_API_KEY secret value found in git history"
 fi
-pass "no CLEANVERSE_API_KEY in git history for env files"
+pass "no CLEANVERSE_API_KEY secrets in git history"
 
 # Contract test count matches README
 TEST_OUT=$(forge test 2>&1)

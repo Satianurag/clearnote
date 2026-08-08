@@ -19,7 +19,7 @@ Every public claim must have a tx hash or Foundry test name. If neither exists, 
 | OFAC merkle on-chain | `pnpm ofac:build` · Safe `commitRoot` tx `e2e.ofacCommitRoot` |
 | Audit pack anchored (hash only) | `pnpm audit:pack INV-001` · `e2e.auditAnchor_INV-001` |
 | Indexer replaces RPC log history | `pnpm verify:indexer` — Registry + NoteIssued aggregates |
-| Cleanverse fallback layer | `pnpm cleanverse:doctor` |
+| Cleanverse sandbox API (live probe) | `pnpm cleanverse:doctor` |
 | SWC-104 fail-open hook documented | `docs/SECURITY.md` |
 | CLNOTE02 never setPolicy | `pnpm verify:wo08` · `pnpm verify:wo15` — `policy()` = BASE `0x36489be45fa84f70a0c2bdb11d824be608cb12dd` |
 | CLLAT01 footage rolled back to BASE | `pnpm verify:wo15` — `policy()` = BASE after demos |

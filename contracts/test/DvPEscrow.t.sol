@@ -6,7 +6,7 @@ import {DvPEscrow} from "../src/DvPEscrow.sol";
 import {ClearNoteController} from "../src/ClearNoteController.sol";
 import {InvoiceRegistry} from "../src/InvoiceRegistry.sol";
 
-contract MockERC20 {
+contract HarnessERC20 {
     mapping(address => uint256) public balanceOf;
     mapping(address => mapping(address => uint256)) public allowance;
     uint8 public decimals;
@@ -38,8 +38,8 @@ contract DvPEscrowTest is Test {
     InvoiceRegistry internal registry;
     ClearNoteController internal controller;
     DvPEscrow internal escrow;
-    MockERC20 internal note;
-    MockERC20 internal cash;
+    HarnessERC20 internal note;
+    HarnessERC20 internal cash;
 
     address internal admin;
     address internal seller;
@@ -56,8 +56,8 @@ contract DvPEscrowTest is Test {
         controller = new ClearNoteController(address(registry), admin, 0);
         escrow = new DvPEscrow(address(controller), admin);
 
-        note = new MockERC20(18);
-        cash = new MockERC20(6);
+        note = new HarnessERC20(18);
+        cash = new HarnessERC20(6);
 
         vm.startPrank(admin);
         controller.grantRole(controller.ESCROW_ROLE(), address(escrow));

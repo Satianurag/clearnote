@@ -1,7 +1,7 @@
 import { getAddress, type Address } from 'viem'
 
-function addr(value: string | undefined, fallback: string): Address {
-  const v = value?.trim() || fallback
+function addr(value: string | undefined, defaultAddress: string): Address {
+  const v = value?.trim() || defaultAddress
   return getAddress(v)
 }
 

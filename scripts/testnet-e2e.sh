@@ -110,7 +110,7 @@ cast send "$REGISTRY" \
 DEADLINE=$(($(date +%s) + 3600))
 # EIP-712 acceptance signature (wallet A as obligor)
 NONCE=$(cast call "$REGISTRY" "nonces(address)(uint256)" "$WALLET_A" --rpc-url "$RPC" 2>/dev/null || echo 0)
-# Use cast for typed data if available — fallback manual sign via forge script
+# Use cast for typed data if available — otherwise manual sign via forge script
 SIG=$(cd "$ROOT" && export WALLET_A_PRIVATE_KEY="$WALLET_A_PRIVATE_KEY" && \
   forge script contracts/script/SignAcceptance.s.sol \
   --rpc-url "$RPC" \

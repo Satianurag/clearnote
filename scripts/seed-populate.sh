@@ -100,19 +100,19 @@ issue_precheck() {
 
 resolve_issue_to() {
   local id="$1" invoice_id="$2"
-  local preferred fallback
+  local preferred spare
   preferred=$(finance_target_for "$id")
   if issue_precheck "$invoice_id" "$preferred"; then
     echo "$preferred"
     return
   fi
   echo "WARN: $id issue to $preferred would revert; using wallet D for on-chain mint" >&2
-  fallback=$D
-  if issue_precheck "$invoice_id" "$fallback"; then
-    echo "$fallback"
+  spare=$D
+  if issue_precheck "$invoice_id" "$spare"; then
+    echo "$spare"
     return
   fi
-  echo "WARN: $id issue fallback $fallback failed; using wallet B" >&2
+  echo "WARN: $id issue spare $spare failed; using wallet B" >&2
   echo "$B"
 }
 

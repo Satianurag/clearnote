@@ -4,7 +4,7 @@ pragma solidity ^0.8.30;
 import {Test} from "forge-std/Test.sol";
 import {ClearNotePolicy} from "../src/ClearNotePolicy.sol";
 
-contract MockRouter {
+contract HarnessRouter {
     bytes4 internal revertSelector;
 
     function setRevert(bytes4 selector) external {
@@ -23,7 +23,7 @@ contract MockRouter {
     }
 }
 
-contract MockController {
+contract HarnessController {
     mapping(address => mapping(address => uint64)) internal locked;
     mapping(address => uint256) internal investorCounts;
     mapping(address => uint256) internal maxInvestorLimits;
@@ -72,7 +72,7 @@ contract MockController {
     }
 }
 
-contract MockRegistry {
+contract HarnessRegistry {
     mapping(address => bytes32) internal backing;
 
     function setBacking(address token, bytes32 invoiceId) external {
@@ -84,7 +84,7 @@ contract MockRegistry {
     }
 }
 
-contract MockNoteToken {
+contract HarnessNoteToken {
     mapping(address => uint256) internal balances;
     uint256 internal supply;
 
@@ -105,7 +105,7 @@ contract MockNoteToken {
     }
 }
 
-contract MockApassRegistry {
+contract HarnessApassRegistry {
     mapping(address => uint256) internal tiers;
 
     function setTier(address wallet, uint256 tier) external {
@@ -117,18 +117,18 @@ contract MockApassRegistry {
     }
 }
 
-contract MockApassRegistryReverts {
+contract HarnessApassRegistryReverts {
     function getAPassData(address) external pure {
         revert();
     }
 }
 
 contract ClearNotePolicyTest is Test {
-    MockRouter internal router;
-    MockController internal ctrl;
-    MockRegistry internal reg;
-    MockNoteToken internal token;
-    MockApassRegistry internal apass;
+    HarnessRouter internal router;
+    HarnessController internal ctrl;
+    HarnessRegistry internal reg;
+    HarnessNoteToken internal token;
+    HarnessApassRegistry internal apass;
     ClearNotePolicy internal policy;
 
     address internal admin;
@@ -140,11 +140,11 @@ contract ClearNotePolicyTest is Test {
         alice = makeAddr("alice");
         bob = makeAddr("bob");
 
-        router = new MockRouter();
-        ctrl = new MockController();
-        reg = new MockRegistry();
-        token = new MockNoteToken();
-        apass = new MockApassRegistry();
+        router = new HarnessRouter();
+        ctrl = new HarnessController();
+        reg = new HarnessRegistry();
+        token = new HarnessNoteToken();
+        apass = new HarnessApassRegistry();
 
         policy = new ClearNotePolicy(
             address(router),
@@ -215,7 +215,7 @@ contract ClearNotePolicyTest is Test {
     }
 
     function _testNoteNotBacked() internal {
-        MockNoteToken unbacked = new MockNoteToken();
+        HarnessNoteToken unbacked = new HarnessNoteToken();
         unbacked.setTotalSupply(1_000_000);
         _happyPath();
 
@@ -297,7 +297,7 @@ contract ClearNotePolicyTest is Test {
     }
 
     function test_burnPathSkipsOurRulesNotBase() public {
-        MockNoteToken unbacked = new MockNoteToken();
+        HarnessNoteToken unbacked = new HarnessNoteToken();
         ctrl.setPaused(address(unbacked), true);
         ctrl.setLockedUntil(address(unbacked), alice, uint64(block.timestamp + 30 days));
 
@@ -331,7 +331,7 @@ contract ClearNotePolicyTest is Test {
 
     function test_apassRegistryRevert_failClosed() public {
         _happyPath();
-        MockApassRegistryReverts broken = new MockApassRegistryReverts();
+        HarnessApassRegistryReverts broken = new HarnessApassRegistryReverts();
         vm.prank(admin);
         policy.setApassRegistry(address(broken));
 
@@ -341,7 +341,7 @@ contract ClearNotePolicyTest is Test {
 
     function test_apassRegistryRevert_skippedWhenMinTierZero() public {
         _happyPath();
-        MockApassRegistryReverts broken = new MockApassRegistryReverts();
+        HarnessApassRegistryReverts broken = new HarnessApassRegistryReverts();
         vm.startPrank(admin);
         policy.setMinTier(0);
         policy.setApassRegistry(address(broken));

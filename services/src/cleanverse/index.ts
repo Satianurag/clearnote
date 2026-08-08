@@ -1,3 +1,3 @@
 export * from './crypto.js'
 export * from './client.js'
-export * from './fallbacks.js'
+export { runDoctor } from './doctor.js'

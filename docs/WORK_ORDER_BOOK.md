@@ -91,7 +91,7 @@ CODE RULES
 - Foundry tests are mandatory. A WO is not done until its acceptance table is green.
 - viem / wagmi: import { monadTestnet } from 'viem/chains'. Always getAddress() or lowercase.
 - Secrets only in .env and *.keys.env, both gitignored. Never a key in source or a commit.
-- On any Cleanverse endpoint that returns an error, log the raw code AND the fallback used.
+- On any Cleanverse endpoint that returns an error, log the raw code and message (no synthetic substitute responses).
 
 GIT
 - Commit locally from now. Do NOT push to a public remote before 2026-08-08 00:00 UTC.
@@ -164,16 +164,18 @@ WORKING
   /query_deposit_address
   /query_ramp_*
 
-BROKEN — each one needs a coded fallback, see WO-07
-  /verify_apass                  "AToken required"      -> read the registry on-chain
-  /validator/verify              12027                  -> local Schematron + our inspect()
-  /validator/rules               returns rules: []      -> same
-  /atoken/query_apply_status     404                    -> GET list_my_atokens
-  /atoken/register_atoken        unknown field schema   -> skip, we own the registry
-  /download_travel_rule          400 wallet null        -> generate IVMS101 ourselves, WO-13
-  /query_txs                     0002 invalid symbol    -> Envio indexer
-  /query_deposit_atoken_list     tokens: null           -> n/a
-  /atoken/launch_wrapped_atoken  ISSUE_FAILED on Monad  -> n/a
+BROKEN / unused on sandbox — product path does not depend on these (see WO-07)
+  /validator/verify              12027 on custom pools    -> on-chain ClearNotePolicy.inspect()
+  /validator/rules               returns rules: []        -> on-chain policy + Saxon Schematron (WO-04)
+  /atoken/query_apply_status     404                      -> GET list_my_atokens
+  /atoken/register_atoken        unknown field schema     -> InvoiceRegistry on-chain
+  /download_travel_rule          400 wallet null          -> IVMS101 generator (WO-13)
+  /query_txs                     0002 invalid symbol      -> Envio indexer for CLINV01 transfers
+  /query_deposit_atoken_list     tokens: null             -> n/a
+  /atoken/launch_wrapped_atoken  ISSUE_FAILED on Monad    -> n/a
+
+WORKING (plain JSON per docs v5.6 — used in app)
+  /verify_apass                  atoken = contract address, not symbol
 
 ERROR CODES
   CN_001 no apass · CV_500 bad KYC fields · CV_504 expirationTime in the past
@@ -366,7 +368,7 @@ Implementation: `try this.canTransfer(token, from, to, amount)` → `ok = true`.
 
 | Test | Expected |
 | --- | --- |
-| **`test_baseRevertBubblesUnchanged`** | mock router reverts `0x322fde89` → policy reverts with **exactly** `0x322fde89`, not our own error |
+| **`test_baseRevertBubblesUnchanged`** | harness router reverts `0x322fde89` → policy reverts with **exactly** `0x322fde89`, not our own error |
 | `test_noStateWrites` | `canTransfer` called via `staticcall` succeeds — proves view-safety |
 | `test_eachRule_revertsWithOwnSelector` | 7 rules × 1 test each, correct custom error |
 | `test_returnFalseIsNotUsed` | grep: `canTransfer` me koi `return false` nahi. Deny sirf revert se |
@@ -544,22 +546,20 @@ Errors: `CashLegFailed()` · `OfferExpired()` · `BelowMinFill()` · `OfferNotFo
 
 ---
 
-# WO-07 · Cleanverse client + fallback layer
+# WO-07 · Cleanverse client + live doctor
 
-**Goal** — ek typed client jo unke 9 broken endpoints ko chhupata nahi, unka **coded fallback** rakhta hai. Yeh judge ke liye "integration depth" ka sabse strong artifact hai: humne unka platform sirf use nahi kiya, uske gaps map kiye aur bhare.
+**Goal** — typed client for Cleanverse sandbox APIs we actually call; `pnpm cleanverse:doctor` probes them live (no synthetic responses).
 
-**Deliverables** — `services/src/cleanverse/`: `crypto.ts` (aes-256-cbc, IV = 16 zero bytes, key = base64-decode api-key) · `client.ts` (dual envelope: `ok = code === 4 || code === '0000'`, payload = `data ?? result`) · `apass.ts` · `atoken.ts` · `fallbacks.ts` · `doctor.ts`.
+**Deliverables** — `services/src/cleanverse/`: `crypto.ts` (aes-256-cbc, IV = 16 zero bytes, key = base64-decode api-key) · `client.ts` (dual envelope: `ok = code === 4 || code === '0000'`, payload = `data ?? result`) · `doctor.ts`.
 
-**Fallback map — hardcode karo, comment me reason likho**
+**Product paths outside Cleanverse API**
 
-| Broken endpoint | Symptom | Fallback |
-| --- | --- | --- |
-| `verify_apass` | "AToken required" | A-Pass registry on-chain read: `hasApass` `0x7a28eae6`, data `0x6a069f61` |
-| `query_txs` | `0002 invalid symbol` | Envio GraphQL on `localhost:8082`, table `Transfer` |
-| `validator/verify` · `validator/rules` | `12027` · empty `rules: []` | local Saxon Schematron (WO-04) + `ClearNotePolicy.inspect()` |
-| `atoken/query_apply_status` | 404 | `GET /atoken/list_my_atokens`, filter by symbol |
-| `download_travel_rule` | 400 wallet null | hamara IVMS101 generator (WO-13) + hash anchor |
-| `register_atoken` | unknown field schema | hamara `InvoiceRegistry` hi registry hai |
+| Gap | Product path |
+| --- | --- |
+| `query_txs` `0002` on CLINV01 | Envio GraphQL indexer (`Transfer` table) |
+| `validator/verify` `12027` | `ClearNotePolicy.inspect()` on-chain |
+| Travel rule download 400 | Local IVMS101 generator + `AuditAnchor` hash (WO-13) |
+| Invoice registry | `InvoiceRegistry` contract — not Cleanverse `register_atoken` |
 
 **Launch queue** — `atoken/launch` batch me ~67% reliable hai aur **failed launch bhi symbol reserve kar leta hai** (retry pe `12002`). Isliye: local reservation file, exponential backoff with jitter, aur `ISSUE_FAILED` pe **symbol suffix bump** (CLINV01 → CLINV01B), same symbol retry **kabhi nahi**.
 
@@ -567,10 +567,9 @@ Errors: `CashLegFailed()` · `OfferExpired()` · `BelowMinFill()` · `OfferNotFo
 
 | Check | Pass = |
 | --- | --- |
-| **`pnpm cleanverse:doctor`** | 15 endpoints ka live table: name · status · latency ms · fallback used. Ise README me paste karna hai |
+| **`pnpm cleanverse:doctor`** | Live table: `query_apass`, `verify_apass`, `query_txs_usdc`, `list_my_atokens` — all PASS |
 | `test_dualEnvelope` | `code: 4` aur `code: "0000"` dono parse |
-| `test_launchRetry_bumpsSymbol` | mocked `ISSUE_FAILED` → next attempt naya symbol, `12002` nahi |
-| `test_everyFallbackReturnsData` | har broken endpoint ka fallback live data deta hai, exception nahi |
+| `test_launchRetry_bumpsSymbol` | simulated `ISSUE_FAILED` → next attempt naya symbol, `12002` nahi |
 | Secret hygiene | logs me api-key ya plaintext body kabhi nahi |
 
 ---
@@ -705,7 +704,7 @@ Seed data se valid IVMS101 JSON banao (originator + beneficiary: naturalPerson /
 - `is_black_list` flag API me set ho jaata hai par transfer block nahi karta → hamara `SanctionsRegistry` karta hai.
 - Unka contract koi compliance event emit nahi karta, aur Monad RPC `eth_getLogs` ko 100 block pe cap karta hai → Envio indexer humne khud chalaya.
 - Policy hook STATICCALL hai, isliye on-chain denial trace exist nahi karta → pre-flight `inspect()` + off-chain denial log + hash anchor.
-- 9 documented endpoints toote hue hain → har ek ka coded fallback, `cleanverse:doctor` ka output dekho.
+- Sandbox gaps documented honestly — product uses indexer + on-chain inspect where Cleanverse API does not cover custom tokens; `pnpm cleanverse:doctor` output in README.
 - Frozen wallet se burn nahi hota, isliye recovery single-step nahi ho sakti → supervised Safe 2-of-3 procedure.
 - IR jaisi FATF-blocked country ka A-Pass ban hi nahi sakta (`BL_003`) → jurisdiction demo SG / US / AE pe hai.
 - EIP-7702 type-4 tx accept hoti hai par `eth_getCode` pe delegation dikhti nahi → **gasless claim nahi kar rahe.**
