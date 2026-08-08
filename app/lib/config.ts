@@ -28,6 +28,17 @@ export const addresses = {
   cllat01: addr(process.env.NEXT_PUBLIC_CLLAT01, '0x13aDF50039Db284B380f06FD4be0061C30A92c96'),
   /** Untouched history — NEVER setPolicy, indexer history depends on it */
   clnote02: addr(process.env.NEXT_PUBLIC_CLNOTE02, '0xDAA42E5c1A8B9724F499729609f166B0D140Ec18'),
+  /** Origin (native) USDC on Monad — ungated ERC20 */
+  originUsdc: addr(process.env.NEXT_PUBLIC_ORIGIN_USDC, '0x534b2f3A21130d7a60830c2Df862319e593943A3'),
+  /** Cleanverse CVA cash leg — aUSDC (A-Token, BASE-gated). From query_deposit_atoken_list monad. */
+  ausdc: addr(process.env.NEXT_PUBLIC_AUSDC, '0xaC0893567D43C3E7e6e35a72803df05416C1f20D'),
+  accessCore: addr(process.env.NEXT_PUBLIC_ACCESS_CORE, '0x8F118338a1fa41E7Fa86Be19A4e8B99Ed58A6EcC'),
+  /** DvP / settlement cash token — defaults to CVA aUSDC */
+  cashToken: addr(
+    process.env.NEXT_PUBLIC_CASH_TOKEN ?? process.env.NEXT_PUBLIC_AUSDC,
+    '0xaC0893567D43C3E7e6e35a72803df05416C1f20D',
+  ),
+  /** @deprecated use originUsdc or cashToken (aUSDC) */
   usdc: addr(process.env.NEXT_PUBLIC_USDC, '0x534b2f3A21130d7a60830c2Df862319e593943A3'),
   miniDvp: addr(process.env.NEXT_PUBLIC_MINI_DVP, '0x0c59e64a3c845A30ba31883115a5e08F56B10fB7'),
   cleanverseRouter: BASE_ROUTER,
@@ -43,6 +54,16 @@ export const addresses = {
   auditAnchor: addr(process.env.NEXT_PUBLIC_AUDIT_ANCHOR, '0x93806a81533790e4e1736C227C7eA5aBc6D4cc7F'),
   sanctions: addr(process.env.NEXT_PUBLIC_SANCTIONS, '0xF7E706B7956546F213aB9B0DcFD13d1a731B6612'),
   safe: addr(process.env.NEXT_PUBLIC_SAFE, '0xb544d5efb15fbae3b3ad4b1ec3594ffeb0926593'),
+  /** Cleanverse IAPassComplianceValidator (Monad UAT) — Telegram pinned CCP guide */
+  cleanverseValidator: addr(
+    process.env.NEXT_PUBLIC_CLEANVERSE_VALIDATOR,
+    '0xaC7e5179C2C7f03f209136886c172eb34F161792',
+  ),
+  /** Ownable pool registered via POST /validator/register (not DvPEscrow — Safe has no owner()) */
+  compliancePool: addr(
+    process.env.NEXT_PUBLIC_COMPLIANCE_POOL,
+    '0x8eC6b0CcC52aBf6dB6f71844eD468f20EA427748',
+  ),
 }
 
 export const demoWallets = {

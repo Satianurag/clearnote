@@ -19,6 +19,10 @@ Every public claim must have a tx hash or Foundry test name. If neither exists, 
 | OFAC merkle on-chain | `pnpm ofac:build` · Safe `commitRoot` tx `e2e.ofacCommitRoot` |
 | Audit pack anchored (hash only) | `pnpm audit:pack INV-001` · `e2e.auditAnchor_INV-001` |
 | Indexer replaces RPC log history | `pnpm verify:indexer` — Registry + NoteIssued aggregates |
+| DvP aUSDC settlement (offer 0) | `e2e.dvpFillAusdc_offer0` in `deployments/monad-10143.json` |
+| DvP aUSDC settlement (offer 1) | `e2e.dvpFillAusdc_offer1` in `deployments/monad-10143.json` |
+| Validator compliance pool registered | `e2e.compliancePoolRegisterTx` · `pnpm cleanverse:doctor` |
+| Validator verify wallet B | `e2e.compliancePoolVerifyWalletB` · `pnpm verify:cva` |
 | Cleanverse sandbox API (live probe) | `pnpm cleanverse:doctor` |
 | SWC-104 fail-open hook documented | `docs/SECURITY.md` |
 | CLNOTE02 never setPolicy | `pnpm verify:wo08` · `pnpm verify:wo15` — `policy()` = BASE `0x36489be45fa84f70a0c2bdb11d824be608cb12dd` |

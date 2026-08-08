@@ -123,11 +123,11 @@ pass "no CLEANVERSE_API_KEY secrets in git history"
 
 # Contract test count matches README
 TEST_OUT=$(forge test 2>&1)
-if echo "$TEST_OUT" | grep -qE '38 tests passed|38 passed'; then
-  pass "forge test 38/38"
+if echo "$TEST_OUT" | grep -qE '40 tests passed|40 passed'; then
+  pass "forge test 40/40"
 else
   echo "$TEST_OUT" | tail -5
-  fail "forge test count mismatch (README claims 38)"
+  fail "forge test count mismatch (README claims 40)"
 fi
 
 echo ""

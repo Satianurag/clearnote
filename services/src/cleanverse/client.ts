@@ -70,4 +70,36 @@ export class CleanverseClient {
     const suffix = q.toString() ? `?${q.toString()}` : ''
     return this.get(`/atoken/list_my_atokens${suffix}`)
   }
+
+  async queryDepositAtokenList(chain: string, opts?: { symbol?: string; address?: string }) {
+    const body: Record<string, unknown> = { chain }
+    if (opts?.symbol) body.symbol = opts.symbol
+    if (opts?.address) body.address = opts.address
+    const r = await this.post('/query_deposit_atoken_list', body, false)
+    return { ...r, data: envelopePayload(r.json) }
+  }
+
+  async validatorIsRegister(chain: string, contractAddress: string) {
+    const r = await this.post('/validator/is_register', { chain, contract_address: contractAddress }, false)
+    return { ...r, data: envelopePayload(r.json) }
+  }
+
+  async validatorVerify(chain: string, contractAddress: string, userAddress: string) {
+    const r = await this.post(
+      '/validator/verify',
+      { chain, contract_address: contractAddress, user_address: userAddress },
+      false,
+    )
+    return { ...r, data: envelopePayload(r.json) }
+  }
+
+  async queryRampQuote(body: Record<string, unknown>) {
+    const r = await this.post('/query_ramp_quote', body, false)
+    return { ...r, data: envelopePayload(r.json) }
+  }
+
+  async queryRampPaymentMethods() {
+    const r = await this.post('/query_ramp_payment_methods', {}, false)
+    return { ...r, data: envelopePayload(r.json) }
+  }
 }

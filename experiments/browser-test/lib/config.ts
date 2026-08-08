@@ -25,6 +25,12 @@ export const addresses = {
   cllat01: addr(process.env.NEXT_PUBLIC_CLLAT01, '0x13aDF50039Db284B380f06FD4be0061C30A92c96'),
   /** Untouched history — NEVER setPolicy, indexer history depends on it */
   clnote02: addr(process.env.NEXT_PUBLIC_CLNOTE02, '0xDAA42E5c1A8B9724F499729609f166B0D140Ec18'),
+  originUsdc: addr(process.env.NEXT_PUBLIC_ORIGIN_USDC, '0x534b2f3A21130d7a60830c2Df862319e593943A3'),
+  ausdc: addr(process.env.NEXT_PUBLIC_AUSDC, '0xaC0893567D43C3E7e6e35a72803df05416C1f20D'),
+  cashToken: addr(
+    process.env.NEXT_PUBLIC_CASH_TOKEN ?? process.env.NEXT_PUBLIC_AUSDC,
+    '0xaC0893567D43C3E7e6e35a72803df05416C1f20D',
+  ),
   usdc: addr(process.env.NEXT_PUBLIC_USDC, '0x534b2f3A21130d7a60830c2Df862319e593943A3'),
   miniDvp: addr(process.env.NEXT_PUBLIC_MINI_DVP, '0x0c59e64a3c845A30ba31883115a5e08F56B10fB7'),
   cleanverseRouter: BASE_ROUTER,

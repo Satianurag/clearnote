@@ -37,7 +37,7 @@ export function MiniDvPForm() {
 
   const cashBal = useReadContract({
     chainId: monadTestnet.id,
-    address: addresses.usdc,
+    address: addresses.cashToken,
     abi: erc20Abi,
     functionName: 'balanceOf',
     args: address ? [address] : undefined,
@@ -56,7 +56,7 @@ export function MiniDvPForm() {
 
   const approveCash = useSimulateContract({
     chainId: monadTestnet.id,
-    address: addresses.usdc,
+    address: addresses.cashToken,
     abi: erc20Abi,
     functionName: 'approve',
     args: [addresses.miniDvp, CASH_AMT],
@@ -72,7 +72,7 @@ export function MiniDvPForm() {
     args: productNote
       ? [
           productNote,
-          addresses.usdc,
+          addresses.cashToken,
           address ?? '0x0000000000000000000000000000000000000000',
           address ?? '0x0000000000000000000000000000000000000000',
           NOTE_AMT,
@@ -107,11 +107,11 @@ export function MiniDvPForm() {
   return (
     <div>
       <p className="muted">
-        Atomic settle: 1 CLINV01 + 1 USDC via MiniDvP at <code>{addresses.miniDvp}</code>.
+        Atomic settle: 1 CLINV01 + 1 aUSDC (CVA) via MiniDvP at <code>{addresses.miniDvp}</code>.
         Product flows use CLINV01 only (not CLNOTE02).
       </p>
       <p>
-        CLINV01 balance: {noteBal.data?.toString() ?? '—'} · USDC balance:{' '}
+        CLINV01 balance: {noteBal.data?.toString() ?? '—'} · aUSDC balance:{' '}
         {cashBal.data?.toString() ?? '—'}
       </p>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
@@ -127,7 +127,7 @@ export function MiniDvPForm() {
           disabled={!approveCash.data || isPending}
           onClick={() => approveCash.data && writeContract(approveCash.data.request)}
         >
-          Approve USDC
+          Approve aUSDC
         </button>
         <button
           type="button"

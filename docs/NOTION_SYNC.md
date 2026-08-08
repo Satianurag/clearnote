@@ -63,7 +63,8 @@ Inspect B→B2: `ok:true code:0x00000000` — recorded in JSON as `e2e.clinv01In
 ## Verification commands (demo)
 
 ```bash
-forge test                    # 38 tests
+forge test                    # 40 tests
+pnpm verify:cva               # live CVA + DvP + validator pool
 pnpm verify:wo08              # live inspect on testnet
 pnpm verify:wo15              # truth pass
 pnpm seed:verify              # 13 manifest / 11 financed

@@ -1,10 +1,11 @@
 'use client'
 
+import { Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { ApassLookup } from '@/components/ApassLookup'
 
-export default function CompliancePage() {
+function ComplianceContent() {
   const params = useSearchParams()
   const tab = params.get('tab')
 
@@ -42,5 +43,13 @@ export default function CompliancePage() {
       </p>
       <ApassLookup />
     </div>
+  )
+}
+
+export default function CompliancePage() {
+  return (
+    <Suspense fallback={<p className="muted">Loading compliance…</p>}>
+      <ComplianceContent />
+    </Suspense>
   )
 }

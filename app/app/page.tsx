@@ -20,7 +20,7 @@ export default function DashboardPage() {
         </div>
         <div className="card">
           <h3>MiniDvP</h3>
-          <p className="muted">Atomic note + USDC settle on MiniDvP contract.</p>
+          <p className="muted">Atomic note + aUSDC (CVA) settle on MiniDvP contract.</p>
           <Link href="/minidvp">Open MiniDvP →</Link>
         </div>
         <div className="card">
@@ -36,7 +36,8 @@ export default function DashboardPage() {
           <li>Chain ID: {chainId}</li>
           <li>CLNOTE02: <code>{addresses.clnote02}</code></li>
           <li>CLLAT01: <code>{addresses.cllat01}</code></li>
-          <li>USDC: <code>{addresses.usdc}</code></li>
+          <li>Origin USDC: <code>{addresses.originUsdc}</code></li>
+          <li>aUSDC (CVA cash): <code>{addresses.ausdc}</code></li>
           <li>MiniDvP: <code>{addresses.miniDvp}</code></li>
           <li>ClearNotePolicy: <code>{addresses.clearNotePolicy}</code></li>
           <li>Safe 2-of-3: <code>{addresses.safe}</code></li>
