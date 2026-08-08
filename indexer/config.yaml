@@ -1,0 +1,79 @@
+# yaml-language-server: $schema=./node_modules/envio/evm.schema.json
+name: clearnote-indexer
+description: ClearNote indexer — CLNOTE02 history + product contracts on Monad testnet
+contracts:
+  - name: ANote
+    handler: ./src/EventHandlers.js
+    events:
+      - event: Transfer(address indexed from, address indexed to, uint256 value)
+  - name: CLLAT
+    handler: ./src/EventHandlers.js
+    events:
+      - event: Transfer(address indexed from, address indexed to, uint256 value)
+  - name: CLINV
+    handler: ./src/EventHandlers.js
+    events:
+      - event: Transfer(address indexed from, address indexed to, uint256 value)
+  - name: InvoiceRegistry
+    handler: ./src/EventHandlers.js
+    events:
+      - event: InvoiceRegistered(bytes32 indexed invoiceId, address indexed originator, address indexed obligor)
+      - event: DuplicateAttempted(bytes32 indexed invoiceId, address wouldBeOriginator, address existingOriginator)
+      - event: ObligorAccepted(bytes32 indexed invoiceId, address indexed obligor, uint256 deadline)
+      - event: InvoiceFinanced(bytes32 indexed invoiceId, address indexed noteToken, uint256 units)
+  - name: ClearNoteController
+    handler: ./src/EventHandlers.js
+    events:
+      - event: NoteIssued(bytes32 indexed invoiceId, address indexed noteToken, address indexed to, uint256 units)
+  - name: DvPEscrow
+    handler: ./src/EventHandlers.js
+    events:
+      - event: OfferPosted(uint256 indexed offerId, address indexed maker, address noteToken, address cashToken, uint256 units, uint256 pricePerUnit, uint256 minFill, uint64 expiry)
+      - event: OfferFilled(uint256 indexed offerId, address indexed buyer, uint256 units, uint256 cashPaid)
+      - event: OfferCancelled(uint256 indexed offerId, address indexed maker)
+  - name: SanctionsRegistry
+    handler: ./src/EventHandlers.js
+    events:
+      - event: RootCommitted(bytes32 indexed root, string sourceUri, uint64 publishedAt)
+      - event: SanctionedAdded(address indexed who)
+  - name: AuditAnchor
+    handler: ./src/EventHandlers.js
+    events:
+      - event: Anchored(uint256 indexed anchorId, bytes32 indexed packHash, string uri, uint64 periodStart, uint64 periodEnd)
+networks:
+  - id: 10143
+    start_block: 51720000
+    rpc_config:
+      url: https://testnet-rpc.monad.xyz
+      initial_block_interval: 50
+      interval_ceiling: 99
+      acceleration_additive: 0
+      query_timeout_millis: 20000
+      backoff_millis: 3000
+    contracts:
+      - name: ANote
+        address:
+          - 0xDAA42E5c1A8B9724F499729609f166B0D140Ec18
+      - name: CLLAT
+        address:
+          - 0x13aDF50039Db284B380f06FD4be0061C30A92c96
+      - name: CLINV
+        address:
+          - 0xEae6ef4f62B735789bD0d899f5f6f2993488Fe69
+      - name: InvoiceRegistry
+        address:
+          - 0x8A515D80279eEfa9f3eC76568257b1f1eF76d534
+      - name: ClearNoteController
+        address:
+          - 0xcbF5382C7C6Cf3951F7F5C8F693e60eCeaDb3565
+          - 0xfE622a9EAEdf047a2379Eb9C7436B8dc2E1D1bAA
+      - name: DvPEscrow
+        address:
+          - 0x2a226bB79De58641F2fa05CcbF3d2Be88761FF6C
+          - 0x1860b3182CAd1813Ce0F992E446e87Fb0FD93417
+      - name: SanctionsRegistry
+        address:
+          - 0xF7E706B7956546F213aB9B0DcFD13d1a731B6612
+      - name: AuditAnchor
+        address:
+          - 0x93806a81533790e4e1736C227C7eA5aBc6D4cc7F

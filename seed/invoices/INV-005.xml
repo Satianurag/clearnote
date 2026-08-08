@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Minimal PINT-SG-style sample for WO-04 canonical hash (seed data) -->
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+         xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+         xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+  <cbc:CustomizationID>urn:peppol:pint:billing-1@sg-1</cbc:CustomizationID>
+  <cbc:ProfileID>urn:peppol:bis:invoice_only:1</cbc:ProfileID>
+  <cbc:ID>INV-005</cbc:ID>
+  <cbc:IssueDate>2026-08-07</cbc:IssueDate>
+  <cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>
+  <cbc:DocumentCurrencyCode>SGD</cbc:DocumentCurrencyCode>
+  <cac:AccountingSupplierParty>
+    <cac:Party>
+      <cac:PartyName><cbc:Name>ClearNote Originator Ltd</cbc:Name></cac:PartyName>
+      <cac:PostalAddress><cbc:CountrySubentity>SG</cbc:CountrySubentity></cac:PostalAddress>
+    </cac:Party>
+  </cac:AccountingSupplierParty>
+  <cac:AccountingCustomerParty>
+    <cac:Party>
+      <cac:PartyName><cbc:Name>Demo Obligor Pte Ltd</cbc:Name></cac:PartyName>
+    </cac:Party>
+  </cac:AccountingCustomerParty>
+  <!-- PayeeParty excluded from docHash — factoring party name varies per WO-04 -->
+  <cac:PayeeParty>
+    <cac:PartyName><cbc:Name>Gulf Bridge Factors</cbc:Name></cac:PartyName>
+  </cac:PayeeParty>
+  <cac:LegalMonetaryTotal>
+    <cbc:PayableAmount currencyID="SGD">100000.00</cbc:PayableAmount>
+  </cac:LegalMonetaryTotal>
+</Invoice>

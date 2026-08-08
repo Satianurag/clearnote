@@ -1,0 +1,24 @@
+{
+  "invoiceId": "INV-001",
+  "docHash": "0x615e6f00895db537c6d3b8cc19c2c2651aa7fa1e64352e2f70172cfd2f5f37da",
+  "xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!-- Minimal PINT-SG-style sample for WO-04 canonical hash (seed data) -->\n<Invoice xmlns=\"urn:oasis:names:specification:ubl:schema:xsd:Invoice-2\"\n         xmlns:cac=\"urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2\"\n         xmlns:cbc=\"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2\">\n  <cbc:CustomizationID>urn:peppol:pint:billing-1@sg-1</cbc:CustomizationID>\n  <cbc:ProfileID>urn:peppol:bis:invoice_only:1</cbc:ProfileID>\n  <cbc:ID>INV-001</cbc:ID>\n  <cbc:IssueDate>2026-08-07</cbc:IssueDate>\n  <cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>\n  <cbc:DocumentCurrencyCode>SGD</cbc:DocumentCurrencyCode>\n  <cac:AccountingSupplierParty>\n    <cac:Party>\n      <cac:PartyName><cbc:Name>ClearNote Originator Ltd</cbc:Name></cac:PartyName>\n      <cac:PostalAddress><cbc:CountrySubentity>SG</cbc:CountrySubentity></cac:PostalAddress>\n    </cac:Party>\n  </cac:AccountingSupplierParty>\n  <cac:AccountingCustomerParty>\n    <cac:Party>\n      <cac:PartyName><cbc:Name>Demo Obligor Pte Ltd</cbc:Name></cac:PartyName>\n    </cac:Party>\n  </cac:AccountingCustomerParty>\n  <!-- PayeeParty excluded from docHash — factoring party name varies per WO-04 -->\n  <cac:PayeeParty>\n    <cac:PartyName><cbc:Name>Gulf Bridge Factors</cbc:Name></cac:PartyName>\n  </cac:PayeeParty>\n  <cac:LegalMonetaryTotal>\n    <cbc:PayableAmount currencyID=\"SGD\">100000.00</cbc:PayableAmount>\n  </cac:LegalMonetaryTotal>\n</Invoice>\n",
+  "txs": {
+    "register": "0x5614cbb4f3fe5885cc9ee0c9fe3b579e5f4857eb71073d1eec81b7998548a632",
+    "accept": "0x3075be369c657091346f0bc41ff710b9b1e5b0a1ff852c23d9e94256b36b7d94",
+    "issue": "0x40310b33b4269c708000202aad29376d5cbc995e7b9b777a8d5bc00c915e2fce"
+  },
+  "ofac": {
+    "sourceDate": "2026-08-07",
+    "root": "0x24db620d640e849c6e5e14e68212dd2eb985ce9048c6d2dee05725ca89b69321",
+    "totalCount": 75
+  },
+  "policy": {
+    "address": "0x2bbCCebE4aeB0FC21dd1BD5BDd3707d3e87A20Bc",
+    "controller": "0xcbF5382C7C6Cf3951F7F5C8F693e60eCeaDb3565",
+    "pinnedNote": "Pinned to contracts live at audit anchoring (2026-08-08). Do not regenerate — on-chain anchor hash is immutable."
+  },
+  "ivmsHash": "0x64529ccfa8bfea3261018dd0321a702b2543d3df4cf964caeee1fd24417c3118",
+  "denialLog": [],
+  "recompute": "pnpm pint:hash seed/invoices/INV-001.xml → docHash must match docHash field",
+  "note": "Policy hook is STATICCALL — on-chain denial events do not exist; inspect() logged off-chain"
+}

@@ -1,0 +1,11 @@
+[profile.default]
+src = "contracts/src"
+out = "contracts/out"
+libs = ["contracts/lib"]
+test = "contracts/test"
+script = "contracts/script"
+solc = "0.8.30"
+fs_permissions = [{ access = "read", path = "./contracts/src" }]
+
+[rpc_endpoints]
+monad = "https://testnet-rpc.monad.xyz"

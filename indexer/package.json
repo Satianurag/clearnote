@@ -1,0 +1,18 @@
+{
+  "name": "clearnote-indexer",
+  "private": true,
+  "scripts": {
+    "codegen": "envio codegen",
+    "build": "cd generated && pnpm build",
+    "dev": "envio dev",
+    "start": "cd generated && TUI_OFF=true pnpm start",
+    "db-setup": "cd generated && pnpm db-setup",
+    "typecheck": "node --check src/EventHandlers.js"
+  },
+  "dependencies": {
+    "envio": "2.7.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

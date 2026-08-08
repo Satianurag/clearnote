@@ -1,0 +1,136 @@
+{
+  "version": 1,
+  "invoices": [
+    {
+      "id": "INV-001",
+      "invoiceId": "0x615e6f00895db537c6d3b8cc19c2c2651aa7fa1e64352e2f70172cfd2f5f37da",
+      "file": "seed/invoices/INV-001.xml",
+      "status": "Financed",
+      "financeTarget": "0x9AE53a6d3c8E8955D1bAA660B4aBd477Fe512C2b",
+      "registerTx": "0x5614cbb4f3fe5885cc9ee0c9fe3b579e5f4857eb71073d1eec81b7998548a632",
+      "acceptTx": "0x3075be369c657091346f0bc41ff710b9b1e5b0a1ff852c23d9e94256b36b7d94",
+      "issueTx": "0x40310b33b4269c708000202aad29376d5cbc995e7b9b777a8d5bc00c915e2fce"
+    },
+    {
+      "id": "INV-002",
+      "invoiceId": "0x628bbd64cb269c918763d77f1f00c49a67211e4e03a0a8a3e0c44147fef0aceb",
+      "file": "seed/invoices/INV-002.xml",
+      "status": "Financed",
+      "financeTarget": "0xb77Dabe967e53dFa2A46B040A2269d6E26A5C7F1",
+      "registerTx": "0xbe793798f33f6c3f870f8a43312d749ecca9b03cab74ffefce643bbffb62ff38",
+      "acceptTx": "0xf423a9306b493fbb91a1fc23ac3bf452be9c66b502fed34092e0201ffa3e5194",
+      "issueTx": "0xd258f00ea8c9dea5781aa2849bc34a9f8f480958a8ec993442b9205841f5ad8b"
+    },
+    {
+      "id": "INV-003",
+      "invoiceId": "0x73bc33827c5ed2aae2214e8c1fa93b2920fd836507f52fb98e3f8fbe03e18880",
+      "file": "seed/invoices/INV-003.xml",
+      "status": "Financed",
+      "financeTarget": "0xf652F0ACBa57B29461Cc9a9Ecd87b8cf1c51DaB7",
+      "registerTx": "0x2e80e79f1c570d2ff679ff17033b3040f914daa8d016da6fd11604a75c7a6a40",
+      "acceptTx": "0x8aae5c0def13918df4f31081bff6dab0b50a67c1453baeb68962e2929a037ae6",
+      "issueTx": "0x102173cc1deb509d44299f24f79fb4562decd6dc7524247919d0089f2847e252"
+    },
+    {
+      "id": "INV-004",
+      "invoiceId": "0xfc4916ea2d4a4f001071a3c06775b09198c5823850260274e3f6f3d3974b1990",
+      "file": "seed/invoices/INV-004.xml",
+      "status": "Financed",
+      "financeTarget": "0x10aBc0Efeff51Ce3dDAdd17eD55261163E0dEd05",
+      "registerTx": "0x2f6ced10bdbb5ba4df10b723f975cbcc5ada17a6e2ce5e97dce61fb8b0304b66",
+      "acceptTx": "0xb22dfb586babf5fb6a1bb615cf93cfcc195585c40373a1594a6dd491691f328a",
+      "issueTx": "0x11ff232e41abfe712734f48043b11d5fe3a3fac2ee7e5868a724c4d34495abc1"
+    },
+    {
+      "id": "INV-005",
+      "invoiceId": "0xa3767705e9b31a6961a663d689b422cd9f3024aad9ffdbbb9c0605962e88d041",
+      "file": "seed/invoices/INV-005.xml",
+      "status": "Financed",
+      "financeTarget": "0x20a2A3cBDd040fdC24c4ebA6fE8531Dad068B7CB",
+      "registerTx": "0x5af83df8b72b2f57552c3ad24d74d9c718e62ae59c01a9608c82ba7082ea47d8",
+      "acceptTx": "0x1a0e9b36f284e2b8de1779f58b423515d178eea51f2813565384f6538e9466ac",
+      "issueTx": "0xa325f7496d7ef05c4ba7a46b73d3495ba8a17bf6ae8f98dbd0a33e859d6c937e"
+    },
+    {
+      "id": "INV-006",
+      "invoiceId": "0x6ec5bb01e2fe9e841c824a8fc49c83fa4ef9f68e857b6753c26718ba1d8864e3",
+      "file": "seed/invoices/INV-006.xml",
+      "status": "Financed",
+      "financeTarget": "0x052eF2f1ce92245E264785ab99A1e7114c809534",
+      "registerTx": "0x6be4c22d4c2925f8ad8c01fae5dd2286b0760379e0fc4f7a72b58bf17e348114",
+      "acceptTx": "0xfbfd4141208a89fed0e35c1c64f0104f0b6e104e8c5cf31dd4db5db6c00919f1",
+      "issueTx": "0x6a471f053756851c8521d2395061ef4757151cfb4dd020ecb2482d083b95bd19"
+    },
+    {
+      "id": "INV-007",
+      "invoiceId": "0xdeeb931cfdccee314770650925b51ee631ac822256468b42e07671819470759d",
+      "file": "seed/invoices/INV-007.xml",
+      "status": "Financed",
+      "financeTarget": "0x9AE53a6d3c8E8955D1bAA660B4aBd477Fe512C2b",
+      "registerTx": "0xe1d072e7dc75f3f864e3f9c2f168f6a5286da8bea8723997ff0d9793e0d659b0",
+      "acceptTx": "0x07afa037f7462ae9d45f6046cf495f716d6be62a59b1d5e4c0744c0e2e47a80d",
+      "issueTx": "0xe8a8ef75bed452da93a61a918d3c7d3e7902d4ac7a8c27f7829ef4524be68e3c"
+    },
+    {
+      "id": "INV-008",
+      "invoiceId": "0x71d970429dad33b829b76b4cee0248e77618c7376cd85183032d73bc97cbeb0c",
+      "file": "seed/invoices/INV-008.xml",
+      "status": "Financed",
+      "financeTarget": "0x1111111111111111111111111111111111111111",
+      "registerTx": "0xbaff21a8384a52d85e96a3877c6adf2540f8f7c8f153dcf78314b89b09e639ba",
+      "acceptTx": "0x04d4e5eb77f6f71f039d42dbddc59ad94e26fddbe40fd8bb928c93eefd287d4e",
+      "issueTx": "0x20a443777d6da1d1eba19491df2c5d9d2ce7399bb9a732ad8b171c23732f5d88"
+    },
+    {
+      "id": "INV-009",
+      "invoiceId": "0xa8e740e2f65ef8bb80936b13607601e4b120d00b69a7f2ef58c6c3ec084ca13c",
+      "file": "seed/invoices/INV-009.xml",
+      "status": "Financed",
+      "financeTarget": "0x9AE53a6d3c8E8955D1bAA660B4aBd477Fe512C2b",
+      "registerTx": "0xfb602fa207eea03d0f43d1b216a5a25ef797567a159e837b91ba26435210bc15",
+      "acceptTx": "0x1ebe3f419b4dd27326781a23ccbbae48c2c5bde975982aa38052091edbaa43ae",
+      "issueTx": "0xe441d1aacdfd0c9e23c120cc4a029391e2870aa601704bef21b1ec10855b8834",
+      "note": "WO-09 demo target was ObligorAccepted; issued to B for lockup/transfer demos"
+    },
+    {
+      "id": "INV-010",
+      "invoiceId": "0xd13551aa9e0ca7ec80802a95559dc8bd3c00096ba56c545e98133ba04f62a083",
+      "file": "seed/invoices/INV-010.xml",
+      "status": "Registered_unaccepted",
+      "financeTarget": "",
+      "registerTx": "0x8e8b870feb7649dc8d367e624f878fded3a3905f02f8a1d9c746c7b02b378223",
+      "acceptTx": "",
+      "issueTx": ""
+    },
+    {
+      "id": "INV-011",
+      "status": "skipped_register",
+      "note": "duplicate demo"
+    },
+    {
+      "id": "INV-012",
+      "invoiceId": "0xbc45fc3e548ff230b68f469dcca56b9217846025f89807ff3a8ac2fa913b21e2",
+      "file": "seed/invoices/INV-012.xml",
+      "status": "Financed",
+      "financeTarget": "0x9AE53a6d3c8E8955D1bAA660B4aBd477Fe512C2b",
+      "registerTx": "0x43202c82fee91d66887d619a16b322a1012d37531f1312db7a6c757f0730c8a7",
+      "acceptTx": "0xf4b754876989ef8d44341b5a093e835a384ca2add9fb361e589df7fa51d9aaa6",
+      "issueTx": "0x2a706bf371aece0cc6482873f7ba90e5a709b5bee66c6383d39a75e575c574ee",
+      "note": "Issued by verify-wo08 lockup demo (setLockup + issueNote -> B)"
+    },
+    {
+      "id": "INV-013",
+      "invoiceId": "0x09a168aa10e7f07fb47d75a56785f61ab2133430575be6e808e229136c136cd0",
+      "status": "Financed",
+      "financeTarget": "0xb544d5efb15fbae3b3ad4b1ec3594ffeb0926593",
+      "issueTx": "0xd9a286f0e897209bbf83e3b2f2c8574198f0f243fb6a325ebed3da20d3b88f3d",
+      "note": "Post-redeploy v3.2 controller issueNote -> Safe (zero-balance holder); invoiceId from controllerIssueInvoiceId_v32"
+    }
+  ],
+  "wallets": {
+    "A": "0x20a2A3cBDd040fdC24c4ebA6fE8531Dad068B7CB",
+    "B": "0x9AE53a6d3c8E8955D1bAA660B4aBd477Fe512C2b",
+    "B2": "0xb77Dabe967e53dFa2A46B040A2269d6E26A5C7F1",
+    "C": "0x052eF2f1ce92245E264785ab99A1e7114c809534"
+  }
+}

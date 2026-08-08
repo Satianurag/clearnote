@@ -1,0 +1,65 @@
+{
+  "chainId": 10143,
+  "rpc": "https://testnet-rpc.monad.xyz",
+  "registry": "0x8A515D80279eEfa9f3eC76568257b1f1eF76d534",
+  "controller": "0xfE622a9EAEdf047a2379Eb9C7436B8dc2E1D1bAA",
+  "policy": "0xa36F46f2631bc092E319d7Ab4cCAA97b9cD63890",
+  "policyNote": "v3.2 bytecode: ApassLookupFailed fail-closed tier gate; onTransfer no secondary lockup reset.",
+  "policyHistory": [
+    {
+      "label": "v3.2-live",
+      "address": "0xa36F46f2631bc092E319d7Ab4cCAA97b9cD63890",
+      "setPolicyTx": "0x022c614a90a417453fd7ce75367eaafc51e54c4f7a7a8821d3e2030ed825740c"
+    },
+    {
+      "label": "v3.1",
+      "address": "0x2bbCCebE4aeB0FC21dd1BD5BDd3707d3e87A20Bc",
+      "setPolicyTx": "0xd287b7c0bb54028543f6cd665de4656b115aca53f9d09b2cd4055b9c1cdb5f7a"
+    },
+    {
+      "label": "v3.0",
+      "address": "0x704d34019484A8fdc136a260901C882b47423a72"
+    },
+    {
+      "label": "v2",
+      "address": "0x3d5c0027792B576C62a35C2f4E7bF17Ac54dCfbb"
+    }
+  ],
+  "sanctions": "0xF7E706B7956546F213aB9B0DcFD13d1a731B6612",
+  "apassRegistry": "0xbA82D189540CaC9DC6FF46B6837CaC1BFdEC58B9",
+  "baseRouter": "0x36489bE45fa84f70a0c2BDB11D824Be608CB12Dd",
+  "cllat01": "0x13aDF50039Db284B380f06FD4be0061C30A92c96",
+  "deployer": "0x20a2A3cBDd040fdC24c4ebA6fE8531Dad068B7CB",
+  "e2e": {
+    "liveTransferBtoB2": "0x9e4d7fa5ab72aa5383ce3abeddc238b67f762241688399a974e30ebe0a41a32e",
+    "clinv01": "0xEae6ef4f62B735789bD0d899f5f6f2993488Fe69",
+    "clinv01MaxPositionBps": 10000,
+    "clinv01LockupSeconds": 86400,
+    "clinv01MaxInvestors": 100,
+    "clinv01SetPolicy": "0xd6183651bb009c7fb6a525ee2baf6ea6e98fd8f2494ff8f5adf04843598e8222",
+    "clinv01SetPolicyV31": "0xd287b7c0bb54028543f6cd665de4656b115aca53f9d09b2cd4055b9c1cdb5f7a",
+    "clinv01SetPolicyV32": "0x022c614a90a417453fd7ce75367eaafc51e54c4f7a7a8821d3e2030ed825740c",
+    "clinv01IssueNote": "0x042408115d219e7f3b34b9dcee00e6a0e1597122ff181856b5b891210318a743",
+    "clinv01TransferBtoB2": "0xe2d0b81add710b2437fbd2884620ad88b657677cf681e5b5533548321d149be1",
+    "clinv01TransferBtoB2_v32": "0x169d04538a5d05f07ee4590ca57413bd75f0d3ef96c56336f781c82115dea49d",
+    "clinv01InspectBtoB2_v32": "ok:true code:0x00000000 reason:Transfer permitted",
+    "clinv01InvoiceId": "0xf398ce1677b6633d0766915d6e380bdcdac3d7f204830f1991cb180768baa970",
+    "aAdminRenounced": true,
+    "safeSoleAdmin": true,
+    "dvpeGrantEscrow": "0x9f3c758ffcd7d5861a6793e9e7e471f3531ddf4f0d6b623162bd3b564e2a1e39",
+    "setSanctionedDemo": "0x8cc3683dd632695ef9323851dc4ad4367ae124baab8f897449bc0edd1ac2b710",
+    "ofacCommitRoot": "0x50cc683608f507db8bdcc4045267ba932460517d2b165692a08d677e45434ba0",
+    "auditAnchor_INV-001": "0x1c7b84d134bbbaf5f36e0408a0ca6deadd5bc12a358652d9836c46937ed10d76",
+    "controllerRedeployGrant": "0xad2c22adce9c3fa93ee5c9d45027bcda31340806c8f77a2fbaf56e7805993c7f",
+    "controllerRedeployAt": "2026-08-08T05:18:54Z",
+    "controllerIssueNote_v32": "0xd9a286f0e897209bbf83e3b2f2c8574198f0f243fb6a325ebed3da20d3b88f3d",
+    "controllerIssueInvoiceId_v32": "0x09a168aa10e7f07fb47d75a56785f61ab2133430575be6e808e229136c136cd0",
+    "clinv01GrantMinterV32": "0xfc2c7c7f40c01d91f0deecf2f372640b53201e82a77364f1cd5fb95fdd700b4c",
+    "clinv01RevokeMinterOld": "0xfb5e6f416e3918aa96d74a2a05f57cd18e02efc9d02f4206b169f5e365c0a405"
+  },
+  "deployedAt": "2026-08-08T00:00:00Z",
+  "dvpEscrow": "0x1860b3182CAd1813Ce0F992E446e87Fb0FD93417",
+  "auditAnchor": "0x93806a81533790e4e1736C227C7eA5aBc6D4cc7F",
+  "controller_deprecated": "0xcbF5382C7C6Cf3951F7F5C8F693e60eCeaDb3565",
+  "dvpEscrow_deprecated": "0x2a226bB79De58641F2fa05CcbF3d2Be88761FF6C"
+}

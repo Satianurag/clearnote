@@ -1,0 +1,90 @@
+type Transfer @entity {
+  id: ID!
+  from: String!
+  to: String!
+  value: BigInt!
+  token: String!
+}
+
+type InvoiceRegistered @entity {
+  id: ID!
+  invoiceId: String!
+  originator: String!
+  obligor: String!
+}
+
+type DuplicateAttempted @entity {
+  id: ID!
+  invoiceId: String!
+  wouldBeOriginator: String!
+  existingOriginator: String!
+}
+
+type ObligorAccepted @entity {
+  id: ID!
+  invoiceId: String!
+  obligor: String!
+  deadline: BigInt!
+}
+
+type InvoiceFinanced @entity {
+  id: ID!
+  invoiceId: String!
+  noteToken: String!
+  units: BigInt!
+}
+
+type NoteIssued @entity {
+  id: ID!
+  invoiceId: String!
+  noteToken: String!
+  to: String!
+  units: BigInt!
+}
+
+type OfferPosted @entity {
+  id: ID!
+  offerId: BigInt!
+  maker: String!
+  noteToken: String!
+  cashToken: String!
+  units: BigInt!
+  pricePerUnit: BigInt!
+  minFill: BigInt!
+  expiry: BigInt!
+}
+
+type OfferFilled @entity {
+  id: ID!
+  offerId: BigInt!
+  buyer: String!
+  units: BigInt!
+  cashPaid: BigInt!
+}
+
+type OfferCancelled @entity {
+  id: ID!
+  offerId: BigInt!
+  maker: String!
+}
+
+type RootCommitted @entity {
+  id: ID!
+  root: String!
+  sourceUri: String!
+  publishedAt: BigInt!
+}
+
+type SanctionedAdded @entity {
+  id: ID!
+  who: String!
+}
+
+type Anchored @entity {
+  id: ID!
+  anchorId: BigInt!
+  packHash: String!
+  uri: String!
+  periodStart: BigInt!
+  periodEnd: BigInt!
+}

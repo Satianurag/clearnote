@@ -1,0 +1,25 @@
+{
+  "name": "clearnote",
+  "private": true,
+  "scripts": {
+    "build:contracts": "forge build",
+    "typecheck": "pnpm -r typecheck",
+    "test:contracts": "forge test",
+    "verify:wo00": "bash scripts/verify-wo00.sh",
+    "verify:wo08": "bash scripts/verify-wo08.sh",
+    "verify:wo15": "bash scripts/verify-wo15.sh",
+    "upload:zip": "bash scripts/make-upload-zip.sh",
+    "verify:indexer": "node scripts/verify-indexer.mjs",
+    "ofac:build": "node scripts/ofac-build.mjs",
+    "pint:hash": "node scripts/pint-hash.mjs",
+    "pint:test": "node scripts/pint-test.mjs",
+    "cleanverse:doctor": "node scripts/cleanverse-doctor.mjs",
+    "audit:pack": "node scripts/audit-pack.mjs",
+    "audit:anchor": "bash scripts/audit-anchor.sh",
+    "ivms:test": "node scripts/ivms-test.mjs",
+    "redistribute:mon": "bash scripts/redistribute-mon.sh",
+    "seed:verify": "node scripts/seed-verify.mjs",
+    "dev": "pnpm --filter clearnote-app dev"
+  },
+  "packageManager": "pnpm@10.33.2"
+}
