@@ -5,6 +5,7 @@
 **/.env*.local
 *.keys.env
 clearnote.keys.env
+.render-indexer.env
 seed/*.keys.json
 seed/samples/.tmp-*
 seed/audit-packs/.keccak-tmp

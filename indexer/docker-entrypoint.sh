@@ -18,7 +18,8 @@ if [ -n "${DATABASE_URL:-}" ]; then
   ")"
 fi
 
-# Private-network Hasura metadata endpoint (Render worker → Hasura web).
+export ENVIO_INDEXER_HOST=0.0.0.0
+export ENVIO_INDEXER_PORT=${PORT:-9898}
 if [ -n "${HASURA_INTERNAL_HOSTPORT:-}" ]; then
   export HASURA_GRAPHQL_ENDPOINT="http://${HASURA_INTERNAL_HOSTPORT}/v1/metadata"
 fi
