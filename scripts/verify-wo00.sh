@@ -28,7 +28,7 @@ if echo "$STAGED" | grep -qE '^(contracts/out/|cache/)'; then
 fi
 pass "git status clean for secrets/out"
 
-if git grep -iE '(PRIVATE_KEY|privateKey)\s*=\s*0x[a-fA-F0-9]{64}' -- ':!*.keys.env.example' ':!clearnote.keys.env.example' ':!docs/' 2>/dev/null; then
+if git grep -iE '(PRIVATE_KEY|privateKey)\s*=\s*0x[a-fA-F0-9]{64}' -- ':!*.keys.env.example' ':!clearnote.keys.env.example' 2>/dev/null; then
   fail "private key literals in tracked files"
 fi
 pass "no private keys in tracked files"

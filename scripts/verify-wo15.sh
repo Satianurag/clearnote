@@ -14,8 +14,6 @@ fail() { echo -e "${RED}✗${NC} $1"; exit 1; }
 
 echo "=== WO-15 truth pass ==="
 
-[[ -f docs/CLAIMS.md ]] && pass "docs/CLAIMS.md exists"
-
 # services ↔ app reasonCodes mirror (compare selector keys + labels)
 SVC_KEYS=$(grep -oE '"0x[0-9a-f]{8}"' services/src/reasonCodes.ts | sort)
 APP_KEYS=$(grep -oE '"0x[0-9a-f]{8}"' app/lib/reasonCodes.ts | sort)
@@ -57,7 +55,7 @@ done
 
 # Banned overclaim phrases in submission-facing docs (exclude internal book + "do not claim" lists)
 BANNED_HITS=$(git grep -iE 'gasless onboarding|tier enforced by Cleanverse|blacklist enforced by Cleanverse' \
-  -- README.md docs/ARCHITECTURE.md docs/SECURITY.md app/ indexer/README.md 2>/dev/null \
+  -- README.md app/ indexer/README.md 2>/dev/null \
   | grep -viE 'No gasless|not claim|documented next step' || true)
 if [[ -z "$BANNED_HITS" ]]; then
   pass "no banned overclaim phrases in submission paths"
@@ -111,7 +109,7 @@ done
 
 # Secret scan — working tree + history
 if git grep -iE '(PRIVATE_KEY|privateKey)\s*=\s*0x[a-fA-F0-9]{64}' \
-  -- ':!*.keys.env.example' ':!clearnote.keys.env.example' ':!docs/' ':!contracts/lib/' 2>/dev/null; then
+  -- ':!*.keys.env.example' ':!clearnote.keys.env.example' ':!contracts/lib/' 2>/dev/null; then
   fail "private key literals in tracked files"
 fi
 pass "no private keys in tracked working tree"

@@ -10,7 +10,7 @@
 [![Foundry](https://img.shields.io/badge/Tests-Foundry%20(48)-000?style=flat-square)](contracts/test/)
 [![Next.js](https://img.shields.io/badge/App-Next.js%2016-000?style=flat-square&logo=next.js)](app/)
 
-[Live demo](#quick-start) · [Architecture](#architecture) · [Cleanverse integration](#cleanverse-integration) · [On-chain proofs](#on-chain-proofs) · [Docs](docs/)
+[Live demo](#quick-start) · [Architecture](#architecture) · [Cleanverse integration](#cleanverse-integration) · [On-chain proofs](#on-chain-proofs)
 
 </div>
 
@@ -204,8 +204,6 @@ Wallet **B** (`0x9AE53…C2b`) holds A-Pass **1104** on testnet — used in live
 
 > **Design principle:** Cleanverse enforces identity and BASE transfer rules on-chain. ClearNote adds **issuer policy** (tier floor, OFAC, lockup, position cap) as a **decorator** — BASE reverts bubble unchanged; our rules only run after BASE passes.
 
-Full API notes: [`docs/CLEANVERSE_API.md`](docs/CLEANVERSE_API.md)
-
 ---
 
 ## On-chain proofs
@@ -355,8 +353,7 @@ clearnote/
 ├── services/               # Shared Cleanverse client + reason codes
 ├── seed/                   # PINT-SG invoices (INV-001…023) + manifest
 ├── scripts/                # verify:*, cleanverse:doctor, audit:pack, OFAC build
-├── deployments/            # monad-10143.json — canonical addresses + e2e tx hashes
-└── docs/                   # Architecture, claims, Cleanverse API, security
+└── deployments/            # monad-10143.json — canonical addresses + e2e tx hashes
 ```
 
 ---
@@ -397,8 +394,6 @@ Full map: [`services/src/reasonCodes.ts`](services/src/reasonCodes.ts)
 | **Hashes on-chain, PII off-chain** | IVMS101 and audit packs in exports; `packHash` anchored on-chain |
 | **Secondary DvP without re-lockup** | Lockup on `issueNote` only; secondary buyers trade freely after lockup expires |
 
-[`docs/SECURITY.md`](docs/SECURITY.md)
-
 ---
 
 ## Scalability & institutional path
@@ -411,19 +406,6 @@ ClearNote is built for pilot deployment with regulated participants.
 - **CVA settlement rail** — DvP settles in aUSDC; ramp quote API wired for fiat bridges
 - **Travel Rule ready** — IVMS101 payload generation with on-chain hash commitment
 - **Policy upgrades** — `setPolicy` is admin-only; v2 → v3.2 migration proven on live CLINV01
-
----
-
-## Documentation
-
-| Doc | Contents |
-|-----|----------|
-| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Component overview |
-| [`docs/CLEANVERSE_API.md`](docs/CLEANVERSE_API.md) | CVI / CVA / CCP integration reference |
-| [`docs/SECURITY.md`](docs/SECURITY.md) | Policy gates, fail-closed checks, ops runbooks |
-| [`docs/WORK_ORDER_BOOK.md`](docs/WORK_ORDER_BOOK.md) | Work order specs |
-| [`app/README.md`](app/README.md) | App dev guide |
-| [`indexer/README.md`](indexer/README.md) | Envio setup + GraphQL examples |
 
 ---
 
