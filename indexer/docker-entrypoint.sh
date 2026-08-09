@@ -18,8 +18,9 @@ if [ -n "${DATABASE_URL:-}" ]; then
   ")"
 fi
 
+export METRICS_PORT=${PORT:-9898}
 export ENVIO_INDEXER_HOST=0.0.0.0
-export ENVIO_INDEXER_PORT=${PORT:-9898}
+export ENVIO_INDEXER_PORT=${METRICS_PORT}
 if [ -n "${HASURA_INTERNAL_HOSTPORT:-}" ]; then
   export HASURA_GRAPHQL_ENDPOINT="http://${HASURA_INTERNAL_HOSTPORT}/v1/metadata"
 fi
