@@ -38,6 +38,174 @@ export const erc20Abi = [
   },
 ] as const
 
+export const invoiceRegistryAbi = [
+  {
+    name: 'register',
+    type: 'function',
+    stateMutability: 'nonpayable',
+    inputs: [
+      {
+        name: 'inv',
+        type: 'tuple',
+        components: [
+          { name: 'docHash', type: 'bytes32' },
+          { name: 'pintProfileHash', type: 'bytes32' },
+          { name: 'originator', type: 'address' },
+          { name: 'obligor', type: 'address' },
+          { name: 'faceValue', type: 'uint256' },
+          { name: 'dueDate', type: 'uint64' },
+          { name: 'registeredAt', type: 'uint64' },
+          { name: 'currency', type: 'bytes3' },
+          { name: 'status', type: 'uint8' },
+        ],
+      },
+    ],
+    outputs: [{ name: 'invoiceId', type: 'bytes32' }],
+  },
+  {
+    name: 'get',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [{ name: 'invoiceId', type: 'bytes32' }],
+    outputs: [
+      {
+        name: '',
+        type: 'tuple',
+        components: [
+          { name: 'docHash', type: 'bytes32' },
+          { name: 'pintProfileHash', type: 'bytes32' },
+          { name: 'originator', type: 'address' },
+          { name: 'obligor', type: 'address' },
+          { name: 'faceValue', type: 'uint256' },
+          { name: 'dueDate', type: 'uint64' },
+          { name: 'registeredAt', type: 'uint64' },
+          { name: 'currency', type: 'bytes3' },
+          { name: 'status', type: 'uint8' },
+        ],
+      },
+    ],
+  },
+  {
+    name: 'acceptByObligor',
+    type: 'function',
+    stateMutability: 'nonpayable',
+    inputs: [
+      { name: 'invoiceId', type: 'bytes32' },
+      { name: 'deadline', type: 'uint256' },
+      { name: 'sig', type: 'bytes' },
+    ],
+    outputs: [],
+  },
+] as const
+
+export const clearNoteControllerAbi = [
+  {
+    name: 'issueNote',
+    type: 'function',
+    stateMutability: 'nonpayable',
+    inputs: [
+      { name: 'invoiceId', type: 'bytes32' },
+      { name: 'noteToken', type: 'address' },
+      { name: 'to', type: 'address' },
+      { name: 'units', type: 'uint256' },
+    ],
+    outputs: [],
+  },
+  {
+    name: 'lockedUntil',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [
+      { name: 'token', type: 'address' },
+      { name: 'holder', type: 'address' },
+    ],
+    outputs: [{ type: 'uint64' }],
+  },
+  {
+    name: 'investorCount',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [{ name: 'token', type: 'address' }],
+    outputs: [{ type: 'uint256' }],
+  },
+] as const
+
+export const dvpEscrowAbi = [
+  {
+    name: 'postOffer',
+    type: 'function',
+    stateMutability: 'nonpayable',
+    inputs: [
+      { name: 'noteToken', type: 'address' },
+      { name: 'cashToken', type: 'address' },
+      { name: 'units', type: 'uint256' },
+      { name: 'pricePerUnit', type: 'uint256' },
+      { name: 'minFill', type: 'uint256' },
+      { name: 'expiry', type: 'uint64' },
+    ],
+    outputs: [{ name: 'offerId', type: 'uint256' }],
+  },
+  {
+    name: 'fill',
+    type: 'function',
+    stateMutability: 'nonpayable',
+    inputs: [
+      { name: 'offerId', type: 'uint256' },
+      { name: 'units', type: 'uint256' },
+    ],
+    outputs: [],
+  },
+  {
+    name: 'cancel',
+    type: 'function',
+    stateMutability: 'nonpayable',
+    inputs: [{ name: 'offerId', type: 'uint256' }],
+    outputs: [],
+  },
+  {
+    name: 'offers',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [{ name: 'offerId', type: 'uint256' }],
+    outputs: [
+      { name: 'maker', type: 'address' },
+      { name: 'noteToken', type: 'address' },
+      { name: 'cashToken', type: 'address' },
+      { name: 'pricePerUnit', type: 'uint256' },
+      { name: 'minFill', type: 'uint256' },
+      { name: 'expiry', type: 'uint64' },
+      { name: 'remaining', type: 'uint256' },
+      { name: 'active', type: 'bool' },
+    ],
+  },
+  {
+    name: 'nextOfferId',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [],
+    outputs: [{ type: 'uint256' }],
+  },
+] as const
+
+export const clearNotePolicyAbi = [
+  {
+    name: 'inspect',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [
+      { name: 'token', type: 'address' },
+      { name: 'from', type: 'address' },
+      { name: 'to', type: 'address' },
+      { name: 'amount', type: 'uint256' },
+    ],
+    outputs: [
+      { name: 'ok', type: 'bool' },
+      { name: 'code', type: 'bytes4' },
+      { name: 'reason', type: 'string' },
+    ],
+  },
+] as const
+
 export const miniDvpAbi = [
   {
     name: 'settle',

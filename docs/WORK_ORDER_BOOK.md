@@ -155,6 +155,9 @@ chain    "monad"  (also "base")
 
 WORKING
   /query_apass
+  /verify_apass                  atoken = contract address, not symbol (plain JSON per v5.6)
+  /query_deposit_atoken_list     { chain: "monad" } — USDC ↔ aUSDC pair; symbol is origin token (usdc), not ausdc
+  /query_txs                     ausdc/usdc symbols OK; CLINV01 returns 0002 — use Envio indexer
   /generate_apass          works on CONTRACT addresses too (Safes, escrows) — verified
   /update_status           freeze / unfreeze
   /faucet
@@ -163,19 +166,20 @@ WORKING
   GET /atoken/list_my_atokens
   /query_deposit_address
   /query_ramp_*
+  /validator/is_register         compliance pool registered (0x8eC6…7748)
+  /validator/verify              valid=true for wallet B on registered pool
 
 BROKEN / unused on sandbox — product path does not depend on these (see WO-07)
-  /validator/verify              12027 on custom pools    -> on-chain ClearNotePolicy.inspect()
+  /validator/verify              12027 on **unregistered** pools only — not our compliance pool
   /validator/rules               returns rules: []        -> on-chain policy + Saxon Schematron (WO-04)
   /atoken/query_apply_status     404                      -> GET list_my_atokens
   /atoken/register_atoken        unknown field schema     -> InvoiceRegistry on-chain
   /download_travel_rule          400 wallet null          -> IVMS101 generator (WO-13)
-  /query_txs                     0002 invalid symbol      -> Envio indexer for CLINV01 transfers
-  /query_deposit_atoken_list     tokens: null             -> n/a
+  /query_deposit_atoken_list     tokens: null if wrong body (wallet address or symbol: ausdc)
   /atoken/launch_wrapped_atoken  ISSUE_FAILED on Monad    -> n/a
 
 WORKING (plain JSON per docs v5.6 — used in app)
-  /verify_apass                  atoken = contract address, not symbol
+  (see /verify_apass, /query_deposit_atoken_list, /validator/* above)
 
 ERROR CODES
   CN_001 no apass · CV_500 bad KYC fields · CV_504 expirationTime in the past
@@ -567,7 +571,7 @@ Errors: `CashLegFailed()` · `OfferExpired()` · `BelowMinFill()` · `OfferNotFo
 
 | Check | Pass = |
 | --- | --- |
-| **`pnpm cleanverse:doctor`** | Live table: `query_apass`, `verify_apass`, `query_txs_usdc`, `list_my_atokens` — all PASS |
+| **`pnpm cleanverse:doctor`** | Live table: all **9** probes PASS (`query_apass`, `verify_apass` CLINV01 + aUSDC, `query_deposit_atoken_list`, `query_txs_ausdc`, `list_my_atokens`, `validator/is_register`, `validator/verify`, `query_ramp_payment_methods`) |
 | `test_dualEnvelope` | `code: 4` aur `code: "0000"` dono parse |
 | `test_launchRetry_bumpsSymbol` | simulated `ISSUE_FAILED` → next attempt naya symbol, `12002` nahi |
 | Secret hygiene | logs me api-key ya plaintext body kabhi nahi |

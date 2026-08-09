@@ -1,8 +1,11 @@
 import Link from 'next/link'
 
 const links = [
-  { href: '/', label: 'Dashboard' },
+  { href: '/', label: 'Home' },
+  { href: '/onboard', label: 'Get started' },
+  { href: '/dashboard', label: 'Dashboard' },
   { href: '/exporter', label: 'Exporter' },
+  { href: '/obligor', label: 'Obligor accept' },
   { href: '/exporter?tab=originator', label: 'Originator' },
   { href: '/investor', label: 'Investor' },
   { href: '/compliance/matrix', label: 'Compliance matrix' },

@@ -1,5 +1,5 @@
 import { monadTestnet as viemMonadTestnet } from 'viem/chains'
-import { createConfig, http } from 'wagmi'
+import { createConfig, createStorage, http } from 'wagmi'
 import { injected } from '@wagmi/core'
 import { rpcUrl } from './lib/config'
 
@@ -20,5 +20,8 @@ export const config = createConfig({
   transports: {
     [monadTestnet.id]: http(),
   },
+  storage: createStorage({
+    storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+  }),
   ssr: false,
 })

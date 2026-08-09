@@ -1,12 +1,10 @@
 'use client'
 
-import {
-  useAccount,
-  useChainId,
-  useSimulateContract,
-  useWriteContract,
-} from 'wagmi'
+import { useAccount, useChainId, useSimulateContract } from 'wagmi'
 import { parseUnits, type Address } from 'viem'
+import { NeoButton } from '@/components/neo/NeoButton'
+import { TxFeedback } from '@/components/TxFeedback'
+import { useContractTx } from '@/hooks/useContractTx'
 import { addresses, chainId, demoWallets } from '@/lib/config'
 import { erc20Abi } from '@/lib/contracts'
 import { monadTestnet } from '@/wagmi.config'
@@ -35,6 +33,7 @@ function TransferButton({
   const currentChain = useChainId()
   const { address } = useAccount()
   const onMonad = currentChain === chainId
+  const tx = useContractTx()
 
   const sim = useSimulateContract({
     chainId: monadTestnet.id,
@@ -46,28 +45,41 @@ function TransferButton({
     query: { enabled: Boolean(address && onMonad), retry: false },
   })
 
-  const { writeContract, isPending, error: writeError, isSuccess: writeOk } = useWriteContract()
   const simMsg = sim.isError ? formatErr(sim.error) : ''
-  const writeMsg = writeError ? formatErr(writeError) : ''
-  const errMsg = writeMsg || simMsg
-  const hint = errMsg ? decodeHint(errMsg) : null
-  const canSend = Boolean(sim.data && onMonad && !isPending)
+  const hint = simMsg ? decodeHint(simMsg) : null
+  const canSend = Boolean(sim.data && onMonad && !tx.isBusy)
+
+  const buttonLabel = tx.isSigning
+    ? 'Confirm in wallet…'
+    : tx.isConfirming
+      ? 'Sending…'
+      : 'Send 1 CLLAT'
 
   return (
     <div className="card">
       <strong>{label}</strong>
       <p className="muted">to: {to}</p>
-      <button type="button" disabled={!canSend} onClick={() => sim.data && writeContract(sim.data.request)}>
-        {isPending ? 'Signing…' : 'Send 1 CLLAT'}
-      </button>
-      {sim.isSuccess && !writeError && !writeOk && <p className="ok">Pre-flight OK — safe to sign</p>}
-      {writeOk && <p className="ok">Transaction submitted</p>}
-      {errMsg && (
+      <NeoButton
+        variant="secondary"
+        disabled={!canSend}
+        onClick={() => {
+          tx.reset()
+          if (sim.data) tx.writeContract(sim.data.request)
+        }}
+      >
+        {buttonLabel}
+      </NeoButton>
+      {sim.isSuccess && tx.phase === 'idle' && !tx.error && (
+        <p className="ok">Pre-flight OK — safe to sign</p>
+      )}
+      {tx.isSuccess && <p className="ok">Transfer confirmed on-chain</p>}
+      {simMsg && tx.phase === 'idle' && (
         <pre className="error-pre">
-          {errMsg}
+          {simMsg}
           {hint && <div className="hint">{hint}</div>}
         </pre>
       )}
+      <TxFeedback error={tx.error} onDismiss={() => tx.reset()} />
       {expectPass && sim.isError && (
         <p className="muted">Expected pass — connect wallet B on Monad testnet.</p>
       )}

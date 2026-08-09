@@ -1,7 +1,7 @@
 'use client'
 
 import { useAccount, useChainId, useSwitchChain } from 'wagmi'
-import { chainId, demoWallets } from '@/lib/config'
+import { chainId } from '@/lib/config'
 import { monadTestnet } from '@/wagmi.config'
 
 export function WalletBanner() {
@@ -11,29 +11,25 @@ export function WalletBanner() {
   const onMonad = currentChain === chainId
 
   return (
-    <div style={{ marginBottom: 20 }}>
+    <div className="wallet-banner">
       {address && (
-        <p>
-          Connected: <code>{address}</code>
-        </p>
-      )}
-      {address && address.toLowerCase() !== demoWallets.b.toLowerCase() && (
-        <p className="warn">
-          Demo investor wallet B: <code>{demoWallets.b}</code>
+        <p className="neo-muted">
+          Connected: <code className="neo-code">{address}</code>
         </p>
       )}
       {!onMonad && (
-        <p className="error">
+        <div className="neo-alert neo-alert--error">
           Wrong network ({currentChain}). Monad testnet ({chainId}) required.
           <button
             type="button"
-            className="btn-inline"
+            className="neo-btn neo-btn--secondary neo-btn--sm"
+            style={{ marginLeft: 8 }}
             disabled={isPending}
             onClick={() => switchChain({ chainId: monadTestnet.id })}
           >
             Switch network
           </button>
-        </p>
+        </div>
       )}
     </div>
   )

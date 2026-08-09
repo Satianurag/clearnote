@@ -11,7 +11,7 @@ Sandbox base: `https://uatapi.cleanverse.com/api/cooperate`
 
 ## Plain JSON vs encrypted body
 
-**Plain JSON** (no `data` wrapper): Common Queries including `query_apass`, `verify_apass`, `query_txs`; Validator reads (`validator/verify`, `validator/rules`, …); all Fiat Ramp endpoints.
+**Plain JSON** (no `data` wrapper): Common Queries including `query_apass`, `verify_apass`, `query_deposit_atoken_list`, `query_txs`; Validator reads (`validator/is_register`, `validator/verify`, `validator/rules`, …); all Fiat Ramp endpoints.
 
 **AES encrypted** `{"data":"<base64>"}`: `generate_apass`, `update_status`, `atoken/launch`, `atoken/add_rule`, validator **writes**, etc. Algorithm: AES-256-CBC, IV = 16 zero bytes, key = base64-decode(api-key).
 
@@ -45,7 +45,14 @@ Uses `address` + optional `symbol` (`usdc`, `ausdc`, …). Custom product tokens
 
 ### POST `/query_deposit_atoken_list` — plain
 
-Returns origin USDC ↔ aUSDC (CVA) pairs per chain. Use `{ "chain": "monad" }` only (not user wallet as `address`).
+Returns origin USDC ↔ aUSDC (CVA) pairs per chain.
+
+```json
+{ "chain": "monad" }
+```
+
+- Do **not** pass a user wallet as `address` — docs have no such field; wrong bodies return `tokens: null`.
+- Optional `symbol` filters by **origin (native) token** (e.g. `usdc`), **not** the A-Token symbol (`ausdc`). `{ "chain": "monad", "symbol": "ausdc" }` returns empty — that is expected per v5.6.
 
 Product DvP cash leg: **aUSDC** `0xaC0893567D43C3E7e6e35a72803df05416C1f20D` (not ungated origin USDC).
 
@@ -154,6 +161,10 @@ Sandbox faucet may return insufficient balance / NoAPass on deposit wallets.
 ```bash
 pnpm cleanverse:doctor
 ```
+
+Nine live sandbox checks (no mocks): `query_apass`, `verify_apass` (CLINV01 + aUSDC), `query_deposit_atoken_list`, `query_txs_ausdc`, `list_my_atokens`, `validator/is_register`, `validator/verify`, `query_ramp_payment_methods`.
+
+UAT can be briefly flaky right after credentials rotate or during gateway deploy — re-run the doctor before assuming a query shape is wrong.
 
 ## Do not claim
 

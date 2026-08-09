@@ -33,8 +33,8 @@ InvoiceRegistry.InvoiceRegistered.handler(async ({ event, context }) => {
   context.InvoiceRegistered.set({
     id: eventId(event),
     invoiceId: event.params.invoiceId,
-    originator: event.params.originator,
-    obligor: event.params.obligor,
+    originator: String(event.params.originator).toLowerCase(),
+    obligor: String(event.params.obligor).toLowerCase(),
   });
 });
 
@@ -79,7 +79,7 @@ DvPEscrow.OfferPosted.handler(async ({ event, context }) => {
   context.OfferPosted.set({
     id: eventId(event),
     offerId: event.params.offerId,
-    maker: event.params.maker,
+    maker: String(event.params.maker).toLowerCase(),
     noteToken: event.params.noteToken,
     cashToken: event.params.cashToken,
     units: event.params.units,

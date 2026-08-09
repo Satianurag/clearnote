@@ -1,0 +1,60 @@
+import type { Address, Hex } from 'viem'
+import { chainId } from '@/lib/config'
+
+export const INVOICE_STATUS = {
+  0: 'None',
+  1: 'Registered',
+  2: 'Obligor accepted',
+  3: 'Financed',
+  4: 'Settled',
+  5: 'Defaulted',
+  6: 'Disputed',
+} as const
+
+export type InvoiceStatusCode = keyof typeof INVOICE_STATUS
+
+export const invoiceAcceptanceTypes = {
+  InvoiceAcceptance: [
+    { name: 'invoiceId', type: 'bytes32' },
+    { name: 'obligor', type: 'address' },
+    { name: 'faceValue', type: 'uint256' },
+    { name: 'dueDate', type: 'uint64' },
+    { name: 'deadline', type: 'uint256' },
+  ],
+} as const
+
+export function invoiceAcceptanceDomain(verifyingContract: Address) {
+  return {
+    name: 'ClearNote',
+    version: '1',
+    chainId,
+    verifyingContract,
+  } as const
+}
+
+/** Signature valid until — 7 days from now (on-chain deadline param). */
+export function acceptanceDeadline(): bigint {
+  return BigInt(Math.floor(Date.now() / 1000) + 7 * 86_400)
+}
+
+export function decodeBytes3Currency(raw: Hex | string): string {
+  const hex = raw.startsWith('0x') ? raw.slice(2) : raw
+  if (!hex) return '—'
+  const bytes = new Uint8Array(hex.length / 2)
+  for (let i = 0; i < bytes.length; i++) {
+    bytes[i] = Number.parseInt(hex.slice(i * 2, i * 2 + 2), 16)
+  }
+  return new TextDecoder().decode(bytes).replace(/\0/g, '').trim() || '—'
+}
+
+export function shortHash(hash: Hex): string {
+  return `${hash.slice(0, 10)}…${hash.slice(-8)}`
+}
+
+export function shortAddress(addr: Address): string {
+  return `${addr.slice(0, 6)}…${addr.slice(-4)}`
+}
+
+export function isBytes32(value: string): value is Hex {
+  return /^0x[a-fA-F0-9]{64}$/.test(value)
+}

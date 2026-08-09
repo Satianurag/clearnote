@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { queryIndexer } from '@/lib/indexer'
+import { queryIndexer, queryIndexerInvoices, queryIndexerOffers } from '@/lib/indexer'
 
 export const dynamic = 'force-dynamic'
 
-const ALLOWED_OPS = new Set(['transfers'])
+const ALLOWED_OPS = new Set(['transfers', 'invoices', 'offers'])
 
 export async function GET(request: NextRequest) {
   const op = request.nextUrl.searchParams.get('op') ?? 'transfers'
@@ -12,15 +12,30 @@ export async function GET(request: NextRequest) {
   }
 
   const limit = Number(request.nextUrl.searchParams.get('limit') ?? '25')
-  const result = await queryIndexer(Math.min(Math.max(limit, 1), 100))
+  const capped = Math.min(Math.max(limit, 1), 100)
 
-  if (result.error) {
-    return NextResponse.json({ error: result.error }, { status: 503 })
+  if (op === 'transfers') {
+    const result = await queryIndexer(capped)
+    if (result.error) return NextResponse.json({ error: result.error }, { status: 503 })
+    return NextResponse.json({
+      transfers: result.transfers,
+      total: result.total,
+      metadata: result.metadata,
+    })
   }
 
-  return NextResponse.json({
-    transfers: result.transfers,
-    total: result.total,
-    metadata: result.metadata,
-  })
+  if (op === 'invoices') {
+    const originator = request.nextUrl.searchParams.get('originator')?.trim() || undefined
+    const result = await queryIndexerInvoices(capped, originator)
+    if ('error' in result && result.error) {
+      return NextResponse.json({ error: result.error }, { status: 503 })
+    }
+    return NextResponse.json(result)
+  }
+
+  const result = await queryIndexerOffers(capped)
+  if ('error' in result && result.error) {
+    return NextResponse.json({ error: result.error }, { status: 503 })
+  }
+  return NextResponse.json(result)
 }

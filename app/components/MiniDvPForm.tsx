@@ -1,19 +1,19 @@
 'use client'
 
-import {
-  useAccount,
-  useChainId,
-  useReadContract,
-  useSimulateContract,
-  useWriteContract,
-} from 'wagmi'
+import { useState } from 'react'
+import { useAccount, useChainId, useReadContract, useSimulateContract } from 'wagmi'
 import { parseUnits } from 'viem'
+import { NeoButton } from '@/components/neo/NeoButton'
+import { TxFeedback } from '@/components/TxFeedback'
+import { useContractTx } from '@/hooks/useContractTx'
 import { addresses, chainId } from '@/lib/config'
 import { erc20Abi, miniDvpAbi } from '@/lib/contracts'
 import { monadTestnet } from '@/wagmi.config'
 
 const NOTE_AMT = parseUnits('1', 18)
 const CASH_AMT = parseUnits('1', 6)
+
+type DvpAction = 'note' | 'cash' | 'settle' | null
 
 function formatErr(error: Error) {
   const e = error as Error & { shortMessage?: string }
@@ -25,6 +25,8 @@ export function MiniDvPForm() {
   const currentChain = useChainId()
   const { address } = useAccount()
   const onMonad = currentChain === chainId
+  const tx = useContractTx()
+  const [activeAction, setActiveAction] = useState<DvpAction>(null)
 
   const noteBal = useReadContract({
     chainId: monadTestnet.id,
@@ -83,8 +85,6 @@ export function MiniDvPForm() {
     query: { enabled: Boolean(address && onMonad && productNote) },
   })
 
-  const { writeContract, isPending, error: writeError, isSuccess } = useWriteContract()
-
   if (!productNote) {
     return (
       <p className="warn">
@@ -97,12 +97,25 @@ export function MiniDvPForm() {
   if (!address) return <p>Connect wallet to use MiniDvP.</p>
   if (!onMonad) return <p className="error">Switch to Monad testnet first.</p>
 
-  const errMsg =
-    writeError ? formatErr(writeError) :
+  const simErr =
     settle.error ? formatErr(settle.error) :
     approveNote.error ? formatErr(approveNote.error) :
     approveCash.error ? formatErr(approveCash.error) :
     null
+
+  function runAction(action: DvpAction, request: Parameters<typeof tx.writeContract>[0] | undefined) {
+    if (!request) return
+    setActiveAction(action)
+    tx.reset()
+    tx.writeContract(request)
+  }
+
+  function labelFor(action: DvpAction, idle: string): string {
+    if (activeAction !== action || !tx.isBusy) return idle
+    if (tx.isSigning) return 'Confirm in wallet…'
+    if (tx.isConfirming) return 'Confirming…'
+    return idle
+  }
 
   return (
     <div>
@@ -115,30 +128,37 @@ export function MiniDvPForm() {
         {cashBal.data?.toString() ?? '—'}
       </p>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
-        <button
-          type="button"
-          disabled={!approveNote.data || isPending}
-          onClick={() => approveNote.data && writeContract(approveNote.data.request)}
+        <NeoButton
+          variant="secondary"
+          disabled={!approveNote.data || tx.isBusy}
+          onClick={() => runAction('note', approveNote.data?.request)}
         >
-          Approve CLINV01
-        </button>
-        <button
-          type="button"
-          disabled={!approveCash.data || isPending}
-          onClick={() => approveCash.data && writeContract(approveCash.data.request)}
+          {labelFor('note', 'Approve CLINV01')}
+        </NeoButton>
+        <NeoButton
+          variant="secondary"
+          disabled={!approveCash.data || tx.isBusy}
+          onClick={() => runAction('cash', approveCash.data?.request)}
         >
-          Approve aUSDC
-        </button>
-        <button
-          type="button"
-          disabled={!settle.data || isPending}
-          onClick={() => settle.data && writeContract(settle.data.request)}
+          {labelFor('cash', 'Approve aUSDC')}
+        </NeoButton>
+        <NeoButton
+          variant="secondary"
+          disabled={!settle.data || tx.isBusy}
+          onClick={() => runAction('settle', settle.data?.request)}
         >
-          {isPending ? 'Signing…' : 'Settle (MiniDvP)'}
-        </button>
+          {labelFor('settle', 'Settle (MiniDvP)')}
+        </NeoButton>
       </div>
-      {isSuccess && <p className="ok">Transaction submitted</p>}
-      {errMsg && <pre className="error-pre">{errMsg}</pre>}
+      {tx.isSuccess && <p className="ok">Transaction confirmed on-chain</p>}
+      {simErr && tx.phase === 'idle' && <pre className="error-pre">{simErr}</pre>}
+      <TxFeedback
+        error={tx.error}
+        onDismiss={() => {
+          tx.reset()
+          setActiveAction(null)
+        }}
+      />
     </div>
   )
 }

@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { addresses, chainId, demoWallets } from '@/lib/config'
+import { addresses, chainId } from '@/lib/config'
 
 export default function DashboardPage() {
   return (
@@ -8,6 +8,16 @@ export default function DashboardPage() {
       <p>Production demo surfaces for ClearNote hackathon build.</p>
 
       <div className="grid grid-2" style={{ marginTop: 20 }}>
+        <div className="card">
+          <h3>Exporter</h3>
+          <p className="muted">Upload invoice, register on-chain, originator portfolio.</p>
+          <Link href="/exporter">Open exporter →</Link>
+        </div>
+        <div className="card">
+          <h3>Investor</h3>
+          <p className="muted">DvP offers, pre-flight inspect(), aUSDC cash leg.</p>
+          <Link href="/investor">Open investor →</Link>
+        </div>
         <div className="card">
           <h3>Wallet transfer</h3>
           <p className="muted">MetaMask pre-flight — pass to A, fail without A-Pass.</p>
@@ -24,16 +34,17 @@ export default function DashboardPage() {
           <Link href="/minidvp">Open MiniDvP →</Link>
         </div>
         <div className="card">
-          <h3>A-Pass lookup</h3>
-          <p className="muted">Cleanverse CVI query via server proxy.</p>
-          <Link href="/compliance">Query A-Pass →</Link>
+          <h3>Compliance matrix</h3>
+          <p className="muted">Live reason-code matrix from on-chain inspect().</p>
+          <Link href="/compliance/matrix">Open matrix →</Link>
         </div>
       </div>
 
       <div className="card" style={{ marginTop: 20 }}>
-        <h3>Deployed addresses</h3>
+        <h3>Deployed contracts</h3>
         <ul className="muted" style={{ fontSize: 13 }}>
           <li>Chain ID: {chainId}</li>
+          <li>CLINV01: <code>{addresses.clinv01}</code></li>
           <li>CLNOTE02: <code>{addresses.clnote02}</code></li>
           <li>CLLAT01: <code>{addresses.cllat01}</code></li>
           <li>Origin USDC: <code>{addresses.originUsdc}</code></li>
@@ -41,8 +52,6 @@ export default function DashboardPage() {
           <li>MiniDvP: <code>{addresses.miniDvp}</code></li>
           <li>ClearNotePolicy: <code>{addresses.clearNotePolicy}</code></li>
           <li>Safe 2-of-3: <code>{addresses.safe}</code></li>
-          <li>Wallet A (issuer): <code>{demoWallets.a}</code></li>
-          <li>Wallet B (investor): <code>{demoWallets.b}</code></li>
         </ul>
       </div>
     </div>

@@ -64,12 +64,17 @@ export async function cvRequest(
     body: payload,
   })
   const json = (await res.json()) as Record<string, unknown>
+  const code = json.code ?? json.status ?? (res.ok ? null : res.status)
+  const message =
+    json.message ??
+    json.error ??
+    (typeof json.status === 'number' && !res.ok ? `HTTP ${json.status}` : null)
   return {
     ok: isSuccess(json.code),
     raw: json,
     data: json.data ?? json.result ?? null,
-    code: json.code,
-    message: json.message,
+    code,
+    message,
   }
 }
 

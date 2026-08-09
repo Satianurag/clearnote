@@ -63,6 +63,8 @@ Policy v2 (`0x3d5c0027792B576C62a35C2f4E7bF17Ac54dCfbb`) is superseded — live 
 
 | Route | Purpose |
 |-------|---------|
+| `/` | Marketing landing page (`public/landing.html`) |
+| `/dashboard` | Demo hub — links to all product surfaces |
 | `/exporter` | Invoice upload flow |
 | `/exporter?tab=originator` | Portfolio from `seed/manifest.json` |
 | `/investor` | DvP + pre-flight `inspect()` |
@@ -99,7 +101,7 @@ Full map: `services/src/reasonCodes.ts` (mirrored in `app/lib/reasonCodes.ts`)
 - Cleanverse `min_tier` / `is_black_list` are **API-only** — we enforce tier and OFAC on-chain.
 - Policy hook is **STATICCALL** — no on-chain denial events; `inspect()` + audit-pack denial log.
 - `eth_getLogs` capped at **100 blocks** on Monad RPC — history via Envio indexer only.
-- Sandbox gaps: `query_txs` for custom symbols — product uses Envio indexer + on-chain `inspect()` instead; `pnpm cleanverse:doctor` probes live endpoints (validator pool registered, `verify` valid for wallet B).
+- Sandbox gaps: `query_txs` for custom product symbols (CLINV01) — use Envio indexer + on-chain `inspect()` instead. `verify_apass`, `query_deposit_atoken_list`, and validator pool checks are live (`pnpm cleanverse:doctor`, 9 probes).
 - Frozen wallet burn blocked by BASE — see `docs/SECURITY.md` recover runbook (unfreeze → recover → re-freeze).
 - **No gasless onboarding claim** — EIP-7702 type-4 accepted; sponsored onboarding is a documented next step.
 - OFAC list: **72 real SDN EVM + 3 synthetic testnet** addresses (`seed/ofac/ofac-root.json`).
