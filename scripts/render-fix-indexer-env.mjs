@@ -23,11 +23,24 @@ const envVars = [
   { key: 'DATABASE_URL', value: db },
   { key: 'HASURA_GRAPHQL_ADMIN_SECRET', value: hasuraSecret },
   { key: 'HASURA_PUBLIC_URL', value: 'https://clearnote-hasura.onrender.com' },
+  { key: 'HASURA_GRAPHQL_ENDPOINT', value: 'https://clearnote-hasura.onrender.com/v1/metadata' },
   { key: 'HASURA_INTERNAL_HOSTPORT', value: 'clearnote-hasura:10000' },
   { key: 'TUI_OFF', value: 'true' },
   { key: 'LOG_LEVEL', value: 'info' },
-  { key: 'RUN_DB_SETUP', value: 'true' },
+  { key: 'RUN_DB_SETUP', value: 'false' },
 ]
+
+await api('/services/srv-d9sn7vafngtc73fm0rvg', {
+  method: 'PATCH',
+  body: JSON.stringify({
+    serviceDetails: {
+      envSpecificDetails: {
+        preDeployCommand: '/docker-entrypoint.sh setup',
+      },
+    },
+  }),
+})
+console.log('preDeployCommand set')
 
 const saved = await api('/services/srv-d9sn7vafngtc73fm0rvg/env-vars', {
   method: 'PUT',
