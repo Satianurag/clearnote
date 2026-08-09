@@ -1,6 +1,5 @@
 'use client'
 
-import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useEffect, useState } from 'react'
 import { ConnectWallet } from '@/components/ConnectWallet'
@@ -54,14 +53,6 @@ function OnboardContent() {
 
   return (
     <div className="onboard-page">
-      <section className="onboard-hero">
-        <h1 className="onboard-hero__title">
-          Pick your path.
-          <br />
-          <span className="onboard-hero__title-accent">Connect once.</span>
-        </h1>
-      </section>
-
       <ol className="onboard-stepper" aria-label="Onboarding progress">
         <li
           className={`onboard-stepper__item ${step >= 1 ? 'onboard-stepper__item--done' : ''} ${step === 1 ? 'onboard-stepper__item--current' : ''}`}
@@ -208,10 +199,6 @@ function OnboardContent() {
           </div>
         </section>
       )}
-
-      <footer className="onboard-footer">
-        <Link href="/dashboard">Dashboard</Link>
-      </footer>
 
       {active && isReady && canLaunch && (
         <div className="onboard-sticky-cta">

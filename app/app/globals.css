@@ -160,10 +160,8 @@ a {
   font-family: var(--font-space), system-ui, -apple-system, sans-serif;
 }
 
-.onboard-theme h1,
 .onboard-theme h2,
 .onboard-theme h3,
-.onboard-theme .onboard-hero__title,
 .onboard-theme .onboard-section__title,
 .onboard-theme .onboard-persona-card__title,
 .onboard-theme .onboard-launch__title {
@@ -176,26 +174,9 @@ a {
 .onboard-shell {
   min-height: 100vh;
   background: var(--neo-cream);
-  position: relative;
-}
-
-.onboard-shell::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  opacity: 0.35;
-  background-image:
-    linear-gradient(var(--neo-black) 1px, transparent 1px),
-    linear-gradient(90deg, var(--neo-black) 1px, transparent 1px);
-  background-size: 48px 48px;
-  mask-image: linear-gradient(to bottom, #000 0%, transparent 70%);
 }
 
 .onboard-main {
-  position: relative;
-  z-index: 1;
   max-width: 1280px;
   margin: 0 auto;
   padding: 40px 24px 120px;
@@ -210,25 +191,6 @@ a {
 .onboard-loading {
   color: var(--neo-muted);
   font-weight: 600;
-}
-
-/* Hero */
-.onboard-hero {
-  max-width: 720px;
-}
-
-.onboard-hero__title {
-  margin: 0;
-  font-size: clamp(2.5rem, 7vw, 4.25rem);
-  line-height: 0.92;
-}
-
-.onboard-hero__title-accent {
-  display: inline-block;
-  background: var(--neo-black);
-  color: var(--neo-cream);
-  padding: 0 12px 4px;
-  box-shadow: var(--neo-shadow);
 }
 
 /* Stepper */
@@ -504,12 +466,6 @@ a {
 
 .onboard-launch__btn {
   flex-shrink: 0;
-}
-
-.onboard-footer {
-  text-align: center;
-  font-size: 0.9rem;
-  color: var(--neo-muted);
 }
 
 .onboard-sticky-cta {
@@ -1583,26 +1539,6 @@ textarea:focus-visible,
   padding-top: 0;
   padding-bottom: 16px;
   border-bottom: 3px solid var(--neo-black);
-}
-
-.connect-wallet--multi {
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 8px;
-}
-
-.connect-wallet__list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.connect-wallet__label {
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--neo-muted);
 }
 
 .product-loading {

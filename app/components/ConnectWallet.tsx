@@ -23,11 +23,11 @@ export function ConnectWallet() {
   useErrorToast(connectError ? formatTxError(connectError) : null, 'Wallet')
   useErrorToast(switchError ? formatTxError(switchError) : null, 'Network')
 
-  if (!mounted) {
-    return <span className="connect-wallet__status">Connect wallet</span>
-  }
+  const metaMask = connectors.find((c) => c.id === 'metaMask') ?? connectors[0]
 
-  const readyConnectors = connectors.filter((c) => c.ready !== false)
+  if (!mounted) {
+    return <span className="connect-wallet__status">Connect MetaMask</span>
+  }
 
   if (phase === 'restoring') {
     return <span className="connect-wallet__status">Restoring wallet…</span>
@@ -71,43 +71,18 @@ export function ConnectWallet() {
     )
   }
 
-  if (readyConnectors.length > 1) {
-    return (
-      <div className="connect-wallet connect-wallet--prompt connect-wallet--multi">
-        <span className="connect-wallet__label">Choose wallet</span>
-        <div className="connect-wallet__list">
-          {readyConnectors.map((connector) => (
-            <button
-              key={connector.uid}
-              type="button"
-              className="neo-btn neo-btn--secondary neo-btn--sm"
-              disabled={isPending}
-              onClick={() => {
-                resetConnect()
-                connect({ connector, chainId: monadTestnet.id })
-              }}
-            >
-              {isPending ? 'Connecting…' : connector.name}
-            </button>
-          ))}
-        </div>
-      </div>
-    )
-  }
-
-  const connector = readyConnectors[0]
   return (
     <div className="connect-wallet connect-wallet--prompt">
       <button
         type="button"
         className="neo-btn neo-btn--primary"
-        disabled={isPending || !connector}
+        disabled={isPending || !metaMask}
         onClick={() => {
           resetConnect()
-          if (connector) connect({ connector, chainId: monadTestnet.id })
+          if (metaMask) connect({ connector: metaMask, chainId: monadTestnet.id })
         }}
       >
-        {isPending ? 'Connecting…' : connector ? `Connect ${connector.name}` : 'Connect wallet'}
+        {isPending ? 'Connecting…' : 'Connect MetaMask'}
       </button>
     </div>
   )
