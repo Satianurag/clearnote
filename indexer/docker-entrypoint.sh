@@ -14,7 +14,7 @@ if [ -n "${DATABASE_URL:-}" ]; then
     out('ENVIO_PG_USER', decodeURIComponent(u.username));
     out('ENVIO_POSTGRES_PASSWORD', decodeURIComponent(u.password));
     out('ENVIO_PG_DATABASE', u.pathname.replace(/^\//, ''));
-    out('ENVIO_PG_SSL_MODE', 'require');
+    if (u.hostname.includes('.render.com')) out('ENVIO_PG_SSL_MODE', 'require');
   ")"
 fi
 
@@ -39,7 +39,7 @@ if [ "${1:-start}" = "setup" ]; then
 fi
 
 if [ "${RUN_DB_SETUP:-true}" = "true" ]; then
-  pnpm db-setup > /tmp/db-setup.log 2>&1 &
+  pnpm db-setup > /tmp/db-setup.log 2>&1 || true
 fi
 
 exec pnpm start
