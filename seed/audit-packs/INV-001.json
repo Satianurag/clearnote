@@ -25,30 +25,7 @@
   },
   "obligorAcceptance": {
     "acceptTx": "0x3075be369c657091346f0bc41ff710b9b1e5b0a1ff852c23d9e94256b36b7d94",
-    "eip712": {
-      "domain": {
-        "name": "ClearNote",
-        "version": "1",
-        "chainId": 10143,
-        "verifyingContract": "0x8A515D80279eEfa9f3eC76568257b1f1eF76d534"
-      },
-      "primaryType": "InvoiceAcceptance",
-      "fields": [
-        "invoiceId",
-        "obligor",
-        "faceValue",
-        "dueDate",
-        "deadline"
-      ]
-    },
-    "calldata": {
-      "invoiceId": "0x615e6f00895db537c6d3b8cc19c2c2651aa7fa1e64352e2f70172cfd2f5f37da",
-      "deadline": "1786127237 [1.786e9]",
-      "signature": "0xe0fedadf88000bf665174eb6d1fbec743333c7456ca8ec4332f3662413434b317b881c9a64c18aaab82abae6af6ededaa401aa54a80c9279392571a585fbc0b71b"
-    },
-    "expectedObligor": "0x20a2A3cBDd040fdC24c4ebA6fE8531Dad068B7CB",
-    "onChainInvoiceId": "0x615e6f00895db537c6d3b8cc19c2c2651aa7fa1e64352e2f70172cfd2f5f37da",
-    "note": "acceptByObligor tx succeeded on testnet — signature verified by InvoiceRegistry at inclusion"
+    "error": "Command failed: cast tx 0x3075be369c657091346f0bc41ff710b9b1e5b0a1ff852c23d9e94256b36b7d94 --json --rpc-url https://testnet-rpc.monad.xyz\nError: tx not found: 0x3075be369c657091346f0bc41ff710b9b1e5b0a1ff852c23d9e94256b36b7d94\n"
   },
   "txs": {
     "register": "0x5614cbb4f3fe5885cc9ee0c9fe3b579e5f4857eb71073d1eec81b7998548a632",
@@ -861,6 +838,36 @@
   "travelRuleRequired": true,
   "denialLog": [
     {
+      "scenario": "Ref: issuer",
+      "from": "0x9AE53a6d3c8E8955D1bAA660B4aBd477Fe512C2b",
+      "to": "0x20a2A3cBDd040fdC24c4ebA6fE8531Dad068B7CB",
+      "amount": "1000000000000000000",
+      "ok": false,
+      "selector": "0x6294ca98",
+      "reason": "Transfer lockup still active",
+      "at": "2026-08-10T06:07:23.677Z"
+    },
+    {
+      "scenario": "Ref: investor",
+      "from": "0x9AE53a6d3c8E8955D1bAA660B4aBd477Fe512C2b",
+      "to": "0x9AE53a6d3c8E8955D1bAA660B4aBd477Fe512C2b",
+      "amount": "1000000000000000000",
+      "ok": false,
+      "selector": "0x6294ca98",
+      "reason": "Transfer lockup still active",
+      "at": "2026-08-10T06:07:23.677Z"
+    },
+    {
+      "scenario": "Ref: investor B2",
+      "from": "0x9AE53a6d3c8E8955D1bAA660B4aBd477Fe512C2b",
+      "to": "0xb77Dabe967e53dFa2A46B040A2269d6E26A5C7F1",
+      "amount": "1000000000000000000",
+      "ok": false,
+      "selector": "0x6294ca98",
+      "reason": "Transfer lockup still active",
+      "at": "2026-08-10T06:07:23.677Z"
+    },
+    {
       "scenario": "Ref: frozen",
       "from": "0x9AE53a6d3c8E8955D1bAA660B4aBd477Fe512C2b",
       "to": "0x052eF2f1ce92245E264785ab99A1e7114c809534",
@@ -868,7 +875,7 @@
       "ok": false,
       "selector": "0x322fde89",
       "reason": "Wallet frozen or A-Pass revoked (Cleanverse)",
-      "at": "2026-08-09T18:07:15.084Z"
+      "at": "2026-08-10T06:07:23.677Z"
     },
     {
       "scenario": "Ref: tier-low",
@@ -878,7 +885,7 @@
       "ok": false,
       "selector": "0xaecc0dbe",
       "reason": "A-Pass expired (Cleanverse)",
-      "at": "2026-08-09T18:07:15.084Z"
+      "at": "2026-08-10T06:07:23.677Z"
     },
     {
       "scenario": "Ref: no A-Pass",
@@ -888,7 +895,7 @@
       "ok": false,
       "selector": "0xa6725971",
       "reason": "Recipient has no A-Pass (Cleanverse)",
-      "at": "2026-08-09T18:07:15.084Z"
+      "at": "2026-08-10T06:07:23.677Z"
     },
     {
       "scenario": "Ref: sanctioned (SDN)",
@@ -898,10 +905,10 @@
       "ok": false,
       "selector": "0xa6725971",
       "reason": "Recipient has no A-Pass (Cleanverse)",
-      "at": "2026-08-09T18:07:15.084Z"
+      "at": "2026-08-10T06:07:23.677Z"
     }
   ],
-  "anchorTx": "0x1c7b84d134bbbaf5f36e0408a0ca6deadd5bc12a358652d9836c46937ed10d76",
+  "anchorTx": "0x36d69a93f0e5c24e3674db01e9405f89c17b0924f8b77fc61c790bfaef7359fb",
   "recompute": "pnpm pint:hash seed/invoices/INV-001.xml → docHash must match docHash field",
   "note": "Policy hook is STATICCALL — on-chain denial events do not exist; inspect() logged off-chain in denialLog[]"
 }
