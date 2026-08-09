@@ -3,6 +3,7 @@ import { resolve } from 'node:path'
 import { createPublicClient, http, type Hex } from 'viem'
 import { auditPackJsonPath, listAuditPackIds, loadAuditPack } from '@/lib/audit-pack'
 import { addresses, rpcUrl } from '@/lib/config'
+import { repoRoot } from '@/lib/repo-root'
 import { auditAnchorAbi } from '@/lib/contracts'
 import { execFileSync } from 'node:child_process'
 
@@ -13,10 +14,6 @@ export type OnChainAnchor = {
   periodStart: number
   periodEnd: number
   anchoredAt: number
-}
-
-function repoRoot(): string {
-  return resolve(process.cwd(), '..')
 }
 
 function loadDeploymentE2e(): Record<string, string> {

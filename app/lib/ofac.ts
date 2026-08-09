@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { getAddress, type Hex } from 'viem'
+import { repoRoot } from '@/lib/repo-root'
 
 export type OfacRootMeta = {
   sourceDate: string
@@ -13,10 +14,6 @@ export type OfacRootMeta = {
 
 type OfacRootFile = OfacRootMeta & {
   proofs?: Record<string, Hex[]>
-}
-
-function repoRoot(): string {
-  return resolve(process.cwd(), '..')
 }
 
 export function loadOfacRoot(): OfacRootFile | null {

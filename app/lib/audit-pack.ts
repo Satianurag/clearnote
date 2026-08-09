@@ -1,5 +1,6 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { repoRoot } from '@/lib/repo-root'
 
 export type AuditPack = {
   invoiceId: string
@@ -35,10 +36,6 @@ export type DenialLogEntry = {
 type ManifestInvoice = {
   id: string
   invoiceId: string
-}
-
-function repoRoot(): string {
-  return resolve(process.cwd(), '..')
 }
 
 function loadManifest(): { invoices?: ManifestInvoice[] } {

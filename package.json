@@ -29,6 +29,7 @@
     "redistribute:mon": "bash scripts/redistribute-mon.sh",
     "upgrade:controller": "bash scripts/upgrade-controller-lifecycle.sh",
     "seed:verify": "node scripts/seed-verify.mjs",
+    "build:vercel": "node scripts/prepare-vercel-bundle.mjs && pnpm --filter clearnote-app build",
     "dev": "pnpm --filter clearnote-app dev"
   },
   "packageManager": "pnpm@10.33.2"

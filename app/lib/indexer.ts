@@ -101,7 +101,11 @@ async function enrichTransfersWithTimestamps(
 }
 
 async function gql<T>(query: string, variables: Record<string, unknown>): Promise<T> {
-  const endpoint = process.env.INDEXER_GRAPHQL_URL?.trim() || 'http://localhost:8082/v1/graphql'
+  const configured = process.env.INDEXER_GRAPHQL_URL?.trim()
+  const endpoint =
+    configured ||
+    (process.env.VERCEL ? '' : 'http://localhost:8082/v1/graphql')
+  if (!endpoint) throw new Error('Indexer not configured')
   const secret = process.env.INDEXER_GRAPHQL_ADMIN_SECRET?.trim() || 'testing'
 
   const res = await fetch(endpoint, {

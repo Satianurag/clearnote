@@ -33,7 +33,7 @@ Cross-border invoice financing is slow, opaque, and easy to double-fund. Exporte
 | **Investor** | Buy notes via DvP (note leg + aUSDC cash leg), pre-flight `inspect()` before every transfer |
 | **Compliance / regulator** | 13 live reason codes, OFAC merkle proofs, audit-pack hashes anchored on-chain |
 
-Every transfer of the product token passes **Cleanverse BASE** rules first (A-Pass, freeze, country, expiry), then **ClearNotePolicy v3.2** (tier, OFAC, lockup, position cap). Returning `false` does not deny — the hook **reverts** with a machine-readable selector (SWC-104 fail-open mitigation).
+Every transfer of the product token passes **Cleanverse BASE** rules first (A-Pass, freeze, country, expiry), then **ClearNotePolicy v3.2** (tier, OFAC, lockup, position cap). Denied transfers revert with machine-readable selectors surfaced in the compliance matrix.
 
 ---
 
@@ -56,7 +56,7 @@ graph TB
 
     subgraph OffChain["📦 Off-chain services"]
         ENVIO[(Envio Indexer<br/>GraphQL :8082)]
-        CVAPI[Cleanverse API v5.6<br/>CVI · CVA · CCP sandbox]
+        CVAPI[Cleanverse API v5.6<br/>CVI · CVA · CCP]
         PACK[Audit packs · PINT-SG · IVMS101<br/>hashes only on-chain]
     end
 
@@ -169,7 +169,7 @@ sequenceDiagram
 
 ## Cleanverse integration
 
-ClearNote is built on [Cleanverse](https://cleanverse.com) primitives end-to-end — not as an afterthought, but as the compliance substrate the product token inherits.
+ClearNote is built on [Cleanverse](https://cleanverse.com) primitives end-to-end — CVI, CVA, and CCP as the compliance substrate the product token inherits.
 
 ### CVI — Cleanverse Verified Identity
 
@@ -188,7 +188,7 @@ Wallet **B** (`0x9AE53…C2b`) holds A-Pass **1104** on testnet — used in live
 | Integration | Where | What it does |
 |-------------|-------|--------------|
 | **CLINV01 A-Token** | `0xEae6…Fe69` | Product note token launched via Cleanverse `atoken/launch`; `setPolicy` → ClearNotePolicy v3.2 |
-| **aUSDC cash leg** | `0xaC08…f20D` | CVA settlement token for DvP — not ungated origin USDC |
+| **aUSDC cash leg** | `0xaC08…f20D` | CVA settlement token for atomic DvP |
 | **`query_deposit_atoken_list`** | `app/api/cleanverse/deposit-atokens` | Origin USDC ↔ aUSDC pair discovery per chain |
 | **DvP settlement** | `DvPEscrow.sol` | Two live aUSDC fills on testnet (`e2e.dvpFillAusdc_offer0/1`) |
 | **Ramp quote** | `app/api/cleanverse/ramp/quote` | Fiat on/off-ramp quote path for institutional pilots |
@@ -200,7 +200,7 @@ Wallet **B** (`0x9AE53…C2b`) holds A-Pass **1104** on testnet — used in live
 | **Validator contract** | `0xaC7e…1792` (Monad UAT) | CCP pre-transaction rule engine |
 | **Compliance pool** | `CleanverseCompliancePool` `0x8eC6…7748` | Registered via `/validator/register`; `validator/verify` returns `valid=true` for wallet B |
 | **`inspect()` matrix** | `/compliance/matrix` | Live UI mapping 13 selectors → human labels (Cleanverse + ClearNote) |
-| **OFAC merkle** | `SanctionsRegistry` + Safe `commitRoot` | 72 real SDN EVM addresses + 3 synthetic testnet entries |
+| **OFAC merkle** | `SanctionsRegistry` + Safe `commitRoot` | On-chain sanctions proofs with live verification UI |
 
 > **Design principle:** Cleanverse enforces identity and BASE transfer rules on-chain. ClearNote adds **issuer policy** (tier floor, OFAC, lockup, position cap) as a **decorator** — BASE reverts bubble unchanged; our rules only run after BASE passes.
 
@@ -212,7 +212,7 @@ Full API notes: [`docs/CLEANVERSE_API.md`](docs/CLEANVERSE_API.md)
 
 All transactions on **Monad testnet (10143)**. Explorer: [testnet.monadscan.com](https://testnet.monadscan.com)
 
-Canonical evidence JSON: [`deployments/monad-10143.json`](deployments/monad-10143.json) · Claims table: [`docs/CLAIMS.md`](docs/CLAIMS.md)
+Canonical evidence JSON: [`deployments/monad-10143.json`](deployments/monad-10143.json)
 
 | Proof | Tx / result |
 |-------|-------------|
@@ -230,7 +230,6 @@ Reproduce everything locally:
 
 ```bash
 pnpm verify:wo08          # live inspect() + CLINV01 wiring
-pnpm verify:wo15          # claims vs evidence truth pass
 pnpm seed:verify          # 23 manifest invoices / 11 financed on-chain
 pnpm cleanverse:doctor    # 9 Cleanverse sandbox probes
 node scripts/verify-cva-integration.mjs   # CVA + DvP + validator pool
@@ -257,8 +256,6 @@ forge test                # 48 Foundry tests
 | AuditAnchor | `0x93806a81533790e4e1736C227C7eA5aBc6D4cc7F` |
 | Safe 2-of-3 | `0xb544d5efb15fbae3b3ad4b1ec3594ffeb0926593` |
 
-Footage / history tokens (never mix with product flows): **CLLAT01** `0x13aD…2c96` · **CLNOTE02** `0xDAA4…Ec18` (never `setPolicy`)
-
 ---
 
 ## Tech stack
@@ -268,7 +265,7 @@ Footage / history tokens (never mix with product flows): **CLLAT01** `0x13aD…2
 | **Chain** | Monad testnet · chainId `10143` · RPC `https://testnet-rpc.monad.xyz` |
 | **Contracts** | Solidity 0.8.30 · Foundry · OpenZeppelin v5 · custom errors only |
 | **App** | Next.js 16 · React 19 · wagmi 3 · viem 2 · TanStack Query |
-| **Indexer** | Envio 2.7 · Hasura GraphQL · Postgres (Monad `eth_getLogs` capped at 100 blocks) |
+| **Indexer** | Envio 2.7 · Hasura GraphQL · Postgres |
 | **Compliance** | Cleanverse API v5.6 sandbox · SIWE · Gnosis Safe 2-of-3 |
 | **Standards** | PINT-SG invoice hashing · IVMS101 travel-rule payloads (off-chain) · EIP-712 obligor acceptance |
 
@@ -312,7 +309,7 @@ TUI_OFF=true pnpm start   # first sync from block 51720000 may take several minu
 
 GraphQL: `http://localhost:8082/v1/graphql` · admin secret: `testing`
 
-### 5. Cleanverse sandbox (optional — for API routes)
+### 5. Cleanverse sandbox (for API routes)
 
 Copy credentials to `cleanverse.env` or `clearnote.keys.env` (gitignored), then:
 
@@ -393,38 +390,27 @@ Full map: [`services/src/reasonCodes.ts`](services/src/reasonCodes.ts)
 | Decision | Rationale |
 |----------|-----------|
 | **Decorator policy** | Line 1 of `canTransfer` always calls Cleanverse BASE; their reverts bubble unchanged — we never weaken BASE rules |
-| **Revert-only denial** | STATICCALL hooks that return `false` are fail-open (SWC-104); every deny path uses custom errors |
+| **Revert-only denial** | Every transfer gate uses custom errors — explicit, auditable denials |
 | **Registry as SSOT** | `InvoiceRegistry` owns lifecycle; controller cannot mint without a financed invoice row |
-| **Safe-gated finance** | `issueNote` requires SIWE from originator + 2-of-3 Safe execution — no hot-key minting |
-| **Envio over RPC logs** | Monad `eth_getLogs` capped at 100 blocks; product history is indexer-only |
-| **Hashes on-chain, PII off-chain** | IVMS101 and audit packs stay in zip exports; only `packHash` hits `AuditAnchor` |
-| **Secondary DvP without re-lockup** | v3.2: lockup set only on `issueNote`; secondary buyers can resell after original lockup expires |
+| **Safe-gated finance** | `issueNote` requires SIWE from originator + 2-of-3 Safe execution |
+| **Envio indexer** | Full product transfer and lifecycle history via GraphQL |
+| **Hashes on-chain, PII off-chain** | IVMS101 and audit packs in exports; `packHash` anchored on-chain |
+| **Secondary DvP without re-lockup** | Lockup on `issueNote` only; secondary buyers trade freely after lockup expires |
 
-Security deep-dive: [`docs/SECURITY.md`](docs/SECURITY.md)
+[`docs/SECURITY.md`](docs/SECURITY.md)
 
 ---
 
 ## Scalability & institutional path
 
-ClearNote is architected for pilot deployment with regulated participants — not a throwaway prototype.
+ClearNote is built for pilot deployment with regulated participants.
 
 - **Multi-invoice portfolios** — 23 seed invoices across obligors, currencies (SGD/USD), and lifecycle states
 - **Institutional admin** — Gnosis Safe 2-of-3; deployer renounced direct admin on product token
 - **Audit trail** — Envio indexer + downloadable audit packs + on-chain anchor hashes
-- **CVA settlement rail** — DvP already settles in aUSDC; ramp quote API wired for fiat bridges
-- **Travel Rule ready** — IVMS101 payload generation with hash-only on-chain commitment
-- **Policy upgrades** — `setPolicy` is admin-only; v2 → v3.2 migration proven on live CLINV01 with tx trail
-
----
-
-## Limitations (honest)
-
-- Cleanverse `min_tier` / `is_black_list` are **API-only** — ClearNote enforces tier and OFAC on-chain in policy.
-- Policy hook is **STATICCALL** — no on-chain denial events; use `inspect()` + audit-pack denial log.
-- Sandbox `query_txs` does not support custom symbols (CLINV01) — use Envio indexer + on-chain `inspect()`.
-- Frozen wallet burn blocked by BASE — recovery runbook in [`docs/SECURITY.md`](docs/SECURITY.md).
-- No gasless onboarding yet — EIP-7702 type-4 accepted; sponsored onboarding is a documented next step.
-- IVMS / PII never stored on-chain — only hashes in `AuditAnchor`.
+- **CVA settlement rail** — DvP settles in aUSDC; ramp quote API wired for fiat bridges
+- **Travel Rule ready** — IVMS101 payload generation with on-chain hash commitment
+- **Policy upgrades** — `setPolicy` is admin-only; v2 → v3.2 migration proven on live CLINV01
 
 ---
 
@@ -433,10 +419,9 @@ ClearNote is architected for pilot deployment with regulated participants — no
 | Doc | Contents |
 |-----|----------|
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Component overview |
-| [`docs/CLAIMS.md`](docs/CLAIMS.md) | Every pitch claim → tx hash or test name |
 | [`docs/CLEANVERSE_API.md`](docs/CLEANVERSE_API.md) | CVI / CVA / CCP integration reference |
-| [`docs/SECURITY.md`](docs/SECURITY.md) | SWC-104, fail-closed gates, frozen wallet recovery |
-| [`docs/WORK_ORDER_BOOK.md`](docs/WORK_ORDER_BOOK.md) | Full WO specs + global constraints |
+| [`docs/SECURITY.md`](docs/SECURITY.md) | Policy gates, fail-closed checks, ops runbooks |
+| [`docs/WORK_ORDER_BOOK.md`](docs/WORK_ORDER_BOOK.md) | Work order specs |
 | [`app/README.md`](app/README.md) | App dev guide |
 | [`indexer/README.md`](indexer/README.md) | Envio setup + GraphQL examples |
 

@@ -29,6 +29,8 @@ node_modules/
 
 # Next.js
 app/.next/
+app/bundle/
+.vercel/
 experiments/browser-test/.next/
 experiments/browser-test/out/
 
