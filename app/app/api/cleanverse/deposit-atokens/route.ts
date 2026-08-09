@@ -1,9 +1,13 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
+import { guardRateLimit } from '@/lib/api-guard'
 import { getCleanverseConfig, cvRequest } from '@/lib/cleanverse'
 
 export const dynamic = 'force-dynamic'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const blocked = guardRateLimit(request, 'cleanverse/deposit-atokens', { limit: 60, windowMs: 60_000 })
+  if (blocked) return blocked
+
   const config = getCleanverseConfig()
   if (!config) {
     return NextResponse.json({ error: 'Cleanverse not configured' }, { status: 503 })

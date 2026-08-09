@@ -34,6 +34,22 @@ type InvoiceFinanced @entity {
   units: BigInt!
 }
 
+type InvoiceSettled @entity {
+  id: ID!
+  invoiceId: String!
+}
+
+type InvoiceDefaulted @entity {
+  id: ID!
+  invoiceId: String!
+}
+
+type DisputeRaised @entity {
+  id: ID!
+  invoiceId: String!
+  evidenceHash: String!
+}
+
 type NoteIssued @entity {
   id: ID!
   invoiceId: String!

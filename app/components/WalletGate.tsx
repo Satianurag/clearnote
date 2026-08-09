@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 import { useSwitchChain } from 'wagmi'
 import { monadTestnet } from '@/wagmi.config'
 import { formatTxError } from '@/hooks/useContractTx'
+import { useErrorToast } from '@/hooks/useErrorToast'
 import { useWalletSession } from '@/hooks/useWalletSession'
 import { ConnectWallet } from './ConnectWallet'
 import { NeoCard } from './neo/NeoCard'
@@ -22,6 +23,8 @@ export function WalletGate({
 }: Props) {
   const { phase, currentChain } = useWalletSession()
   const { switchChain, isPending, error: switchError, reset: resetSwitch } = useSwitchChain()
+
+  useErrorToast(switchError ? formatTxError(switchError) : null, 'Network')
 
   if (phase === 'restoring') {
     return (
@@ -63,11 +66,6 @@ export function WalletGate({
           >
             {isPending ? 'Switching…' : 'Switch to Monad testnet'}
           </button>
-          {switchError && (
-            <p className="connect-wallet__error" role="alert">
-              {formatTxError(switchError)}
-            </p>
-          )}
         </div>
       </NeoCard>
     )

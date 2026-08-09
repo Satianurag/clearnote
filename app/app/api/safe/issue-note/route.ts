@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createPublicClient, encodeFunctionData, getAddress, http, isAddress, type Hex } from 'viem'
+import { clientIp, guardRateLimit } from '@/lib/api-guard'
 import { addresses, rpcUrl } from '@/lib/config'
 import { clearNoteControllerAbi, invoiceRegistryAbi } from '@/lib/contracts'
+import { rateLimit } from '@/lib/rate-limit'
+import { siweDomainFromRequest, verifyFinanceSiwe } from '@/lib/siwe'
 import { safeExecuteCalldata, getSafeSignerKeys } from '@/lib/safe-exec'
 import { monadTestnet } from '@/wagmi.config'
 
@@ -11,6 +14,9 @@ const BYTES32_RE = /^0x[a-fA-F0-9]{64}$/
 const DEFAULT_UNITS = BigInt('1000000000000000000') // 1e18 — matches seed scripts
 
 export async function POST(request: NextRequest) {
+  const blocked = guardRateLimit(request, 'safe/issue-note', { limit: 20, windowMs: 60_000 })
+  if (blocked) return blocked
+
   if (!getSafeSignerKeys()) {
     return NextResponse.json(
       { error: 'Safe signer keys not configured (WALLET_A_PRIVATE_KEY, WALLET_B2_PRIVATE_KEY)' },
@@ -18,7 +24,13 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  let body: { invoiceId?: string; recipient?: string; units?: string }
+  let body: {
+    invoiceId?: string
+    originator?: string
+    units?: string
+    siweMessage?: string
+    siweSignature?: string
+  }
   try {
     body = await request.json()
   } catch {
@@ -26,13 +38,54 @@ export async function POST(request: NextRequest) {
   }
 
   const invoiceId = body.invoiceId?.trim() as Hex | undefined
-  const recipient = body.recipient?.trim()
+  const originatorClaim = body.originator?.trim()
 
   if (!invoiceId || !BYTES32_RE.test(invoiceId)) {
     return NextResponse.json({ error: 'valid invoiceId (bytes32) required' }, { status: 400 })
   }
-  if (!recipient || !isAddress(recipient)) {
-    return NextResponse.json({ error: 'valid recipient address required' }, { status: 400 })
+  if (!originatorClaim || !isAddress(originatorClaim)) {
+    return NextResponse.json({ error: 'valid originator address required' }, { status: 400 })
+  }
+
+  const siweMessage = body.siweMessage?.trim()
+  const siweSignature = body.siweSignature?.trim() as Hex | undefined
+  if (!siweMessage || !siweSignature) {
+    return NextResponse.json(
+      { error: 'SIWE message and signature required — sign in wallet to authorize Safe finance' },
+      { status: 401 },
+    )
+  }
+
+  const domain = siweDomainFromRequest(request.headers.get('host'))
+  const siwe = await verifyFinanceSiwe({
+    message: siweMessage,
+    signature: siweSignature,
+    expectedAddress: originatorClaim,
+    invoiceId,
+    domain,
+  })
+  if (!siwe.ok) {
+    return NextResponse.json({ error: siwe.error }, { status: 401 })
+  }
+
+  const ip = clientIp(request)
+  const ipLimit = rateLimit(`issue-note:ip:${ip}`, { limit: 20, windowMs: 60_000 })
+  if (!ipLimit.ok) {
+    return NextResponse.json(
+      { error: `rate limit exceeded — retry in ${ipLimit.retryAfterSec}s` },
+      { status: 429, headers: { 'Retry-After': String(ipLimit.retryAfterSec) } },
+    )
+  }
+
+  const invoiceLimit = rateLimit(`issue-note:inv:${invoiceId.toLowerCase()}`, {
+    limit: 3,
+    windowMs: 300_000,
+  })
+  if (!invoiceLimit.ok) {
+    return NextResponse.json(
+      { error: `invoice rate limit — retry in ${invoiceLimit.retryAfterSec}s` },
+      { status: 429, headers: { 'Retry-After': String(invoiceLimit.retryAfterSec) } },
+    )
   }
 
   const units = body.units ? BigInt(body.units) : DEFAULT_UNITS
@@ -60,7 +113,17 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  const to = getAddress(recipient)
+  const claimedOriginator = getAddress(originatorClaim)
+  const onChainOriginator = getAddress(inv.originator)
+  if (claimedOriginator !== onChainOriginator) {
+    return NextResponse.json(
+      { error: 'originator does not match on-chain invoice record' },
+      { status: 403 },
+    )
+  }
+
+  // Notes are always minted to the registered originator — never caller-supplied.
+  const to = onChainOriginator
   const data = encodeFunctionData({
     abi: clearNoteControllerAbi,
     functionName: 'issueNote',

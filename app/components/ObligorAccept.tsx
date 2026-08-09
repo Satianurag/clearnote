@@ -8,9 +8,12 @@ import {
   useReadContract,
   useSignTypedData,
 } from 'wagmi'
+import { InvoiceSettlementBlock } from '@/components/InvoiceSettlementBlock'
+import { InvoiceStatusTimelineCard } from '@/components/InvoiceStatusTimeline'
 import { NeoButton } from '@/components/neo/NeoButton'
 import { NeoCard } from '@/components/neo/NeoCard'
 import { TxFeedback } from '@/components/TxFeedback'
+import { useErrorToast } from '@/hooks/useErrorToast'
 import { useContractTx } from '@/hooks/useContractTx'
 import { useWalletSession } from '@/hooks/useWalletSession'
 import { addresses, explorerUrl } from '@/lib/config'
@@ -18,6 +21,7 @@ import { invoiceRegistryAbi } from '@/lib/contracts'
 import {
   acceptanceDeadline,
   decodeBytes3Currency,
+  formatFaceValue,
   INVOICE_STATUS,
   invoiceAcceptanceDomain,
   invoiceAcceptanceTypes,
@@ -39,15 +43,13 @@ type RegistryInvoice = {
   status: number
 }
 
-function formatDueDate(unix: bigint): string {
-  const ms = Number(unix) * 1000
-  if (!Number.isFinite(ms)) return '—'
-  return new Date(ms).toLocaleDateString('en-SG', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  })
+type InboxInvoice = {
+  invoiceId: string
+  originator: string
+  obligor: string
 }
+
+import { formatUnixDate } from '@/lib/format'
 
 function ObligorAcceptContent() {
   const params = useSearchParams()
@@ -59,6 +61,35 @@ function ObligorAcceptContent() {
     isBytes32(initialInvoice) ? (initialInvoice as Hex) : null,
   )
   const [error, setError] = useState<string | null>(null)
+  const [inbox, setInbox] = useState<InboxInvoice[]>([])
+  const [inboxLoading, setInboxLoading] = useState(false)
+  const [inboxError, setInboxError] = useState<string | null>(null)
+
+  useErrorToast(error)
+  useErrorToast(inboxError ? `Inbox unavailable: ${inboxError}` : null, 'Inbox')
+
+  const loadInbox = useCallback(async () => {
+    if (!address) return
+    setInboxLoading(true)
+    setInboxError(null)
+    try {
+      const res = await fetch(
+        `/api/indexer?op=invoices&obligor=${encodeURIComponent(address)}&limit=50`,
+      )
+      const json = (await res.json()) as { invoices?: InboxInvoice[]; error?: string }
+      if (!res.ok) throw new Error(json.error ?? `HTTP ${res.status}`)
+      setInbox(json.invoices ?? [])
+    } catch (e) {
+      setInbox([])
+      setInboxError(e instanceof Error ? e.message : 'Failed to load inbox')
+    } finally {
+      setInboxLoading(false)
+    }
+  }, [address])
+
+  useEffect(() => {
+    if (isReady && address) loadInbox()
+  }, [isReady, address, loadInbox])
 
   useEffect(() => {
     if (isBytes32(initialInvoice)) {
@@ -88,6 +119,10 @@ function ObligorAcceptContent() {
   const tx = useContractTx()
   const isBusy = isSigning || tx.isBusy
 
+  useEffect(() => {
+    if (tx.isSuccess) loadInbox()
+  }, [tx.isSuccess, loadInbox])
+
   const acceptButtonLabel = isSigning
     ? 'Sign in wallet…'
     : tx.isSigning
@@ -108,6 +143,14 @@ function ObligorAcceptContent() {
     }
     setLookupId(trimmed as Hex)
   }, [invoiceInput, tx, resetSign])
+
+  function openInboxItem(invoiceId: string) {
+    setError(null)
+    tx.reset()
+    resetSign()
+    setInvoiceInput(invoiceId)
+    setLookupId(invoiceId as Hex)
+  }
 
   async function acceptInvoice() {
     if (!lookupId || !inv || !address) return
@@ -161,6 +204,9 @@ function ObligorAcceptContent() {
           </a>
         </p>
         <div className="obligor-flow__actions">
+          <Link href="/dashboard" className="neo-btn neo-btn--ghost">
+            Dashboard
+          </Link>
           <Link href="/exporter?tab=originator" className="neo-btn neo-btn--secondary">
             Originator portfolio
           </Link>
@@ -174,6 +220,40 @@ function ObligorAcceptContent() {
 
   return (
     <div className="obligor-flow">
+      {isReady && address && (
+        <NeoCard className="obligor-inbox">
+          <h2 className="neo-heading">Your inbox</h2>
+          <p className="neo-muted">
+            Pending invoices registered to you as obligor (from Envio indexer). Select one to review
+            and accept.
+          </p>
+          {inboxLoading && <p className="neo-muted">Loading inbox…</p>}
+          {!inboxLoading && !inboxError && inbox.length === 0 && (
+            <p className="neo-muted">No pending invoices for {shortAddress(address)}.</p>
+          )}
+          {inbox.length > 0 && (
+            <ul className="obligor-inbox__list">
+              {inbox.map((item) => (
+                <li key={item.invoiceId} className="obligor-inbox__item">
+                  <div>
+                    <code title={item.invoiceId}>{shortHash(item.invoiceId as Hex)}</code>
+                    <span className="neo-muted obligor-inbox__from">
+                      from {shortAddress(item.originator as `0x${string}`)}
+                    </span>
+                  </div>
+                  <NeoButton variant="secondary" onClick={() => openInboxItem(item.invoiceId)}>
+                    Review
+                  </NeoButton>
+                </li>
+              ))}
+            </ul>
+          )}
+          <NeoButton variant="ghost" onClick={loadInbox} disabled={inboxLoading}>
+            {inboxLoading ? 'Refreshing…' : 'Refresh inbox'}
+          </NeoButton>
+        </NeoCard>
+      )}
+
       <NeoCard>
         <span className="obligor-flow__step">Step 1</span>
         <h2 className="neo-heading">Find your invoice</h2>
@@ -201,8 +281,8 @@ function ObligorAcceptContent() {
       {isLoading && lookupId && <p className="neo-muted">Reading InvoiceRegistry…</p>}
 
       {lookupId && !isLoading && inv && Number(inv.status) === 0 && (
-        <NeoCard className="obligor-flow__error">
-          <p>No invoice found for this ID on InvoiceRegistry.</p>
+        <NeoCard>
+          <p className="neo-muted">No invoice found for this ID on InvoiceRegistry.</p>
         </NeoCard>
       )}
 
@@ -244,14 +324,28 @@ function ObligorAcceptContent() {
             <div>
               <dt>Face value</dt>
               <dd>
-                {inv.faceValue.toLocaleString()} {decodeBytes3Currency(inv.currency)}
+                {formatFaceValue(inv.faceValue, decodeBytes3Currency(inv.currency))}
               </dd>
             </div>
             <div>
               <dt>Due date</dt>
-              <dd>{formatDueDate(inv.dueDate)}</dd>
+              <dd>{formatUnixDate(inv.dueDate)}</dd>
             </div>
           </dl>
+
+          <InvoiceStatusTimelineCard status={status} className="obligor-flow__timeline" />
+
+          {status >= 3 && lookupId && (
+            <InvoiceSettlementBlock
+              invoiceId={lookupId}
+              status={status}
+              originator={inv.originator}
+              obligor={inv.obligor}
+              faceValue={inv.faceValue}
+              dueDate={inv.dueDate}
+              currency={inv.currency}
+            />
+          )}
 
           {!isReady && (
             <p className="neo-muted obligor-flow__hint">Connect wallet to continue.</p>
@@ -282,12 +376,6 @@ function ObligorAcceptContent() {
               </NeoButton>
             </>
           )}
-        </NeoCard>
-      )}
-
-      {error && (
-        <NeoCard className="exporter-upload__error">
-          <p>{error}</p>
         </NeoCard>
       )}
 

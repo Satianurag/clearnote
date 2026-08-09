@@ -22,8 +22,7 @@ export function WalletBanner() {
           Wrong network ({currentChain}). Monad testnet ({chainId}) required.
           <button
             type="button"
-            className="neo-btn neo-btn--secondary neo-btn--sm"
-            style={{ marginLeft: 8 }}
+            className="neo-btn neo-btn--secondary neo-btn--sm wallet-banner__switch"
             disabled={isPending}
             onClick={() => switchChain({ chainId: monadTestnet.id })}
           >

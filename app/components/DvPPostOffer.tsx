@@ -7,6 +7,8 @@ import { NeoButton } from '@/components/neo/NeoButton'
 import { NeoCard } from '@/components/neo/NeoCard'
 import { TxFeedback } from '@/components/TxFeedback'
 import { formatTxError, useContractTx } from '@/hooks/useContractTx'
+import { useErrorToast, useSuccessToast } from '@/hooks/useErrorToast'
+import { useMonadNetworkToast } from '@/hooks/useMonadNetworkToast'
 import { addresses, chainId, explorerUrl } from '@/lib/config'
 import { dvpEscrowAbi, erc20Abi } from '@/lib/contracts'
 import { monadTestnet } from '@/wagmi.config'
@@ -26,6 +28,7 @@ export function DvPPostOffer({ onPosted }: { onPosted?: () => void }) {
   const [units, setUnits] = useState('1')
   const [price, setPrice] = useState('1')
   const [minFill, setMinFill] = useState('1')
+  const [postedMsg, setPostedMsg] = useState<string | null>(null)
 
   const parsedUnits = (() => {
     try {
@@ -99,22 +102,31 @@ export function DvPPostOffer({ onPosted }: { onPosted?: () => void }) {
     },
   })
 
+  const simErr = postOffer.error ?? approveNote.error
+  const simErrMsg = simErr && tx.phase === 'idle' ? formatTxError(simErr) : null
+
+  useMonadNetworkToast()
+  useSuccessToast(postedMsg)
+  useErrorToast(simErrMsg)
+
   useEffect(() => {
     if (tx.isSuccess && step === 'approve') {
       tx.reset()
       setStep('idle')
     }
     if (tx.isSuccess && step === 'post') {
+      setPostedMsg('Offer posted — book updates automatically.')
       onPosted?.()
       setStep('idle')
     }
   }, [tx.isSuccess, step, onPosted, tx])
 
   if (!address) return null
-  if (!onMonad) return <p className="error">Switch to Monad testnet to post offers.</p>
+  if (!onMonad) {
+    return <p className="neo-muted">Connect wallet on Monad testnet to continue.</p>
+  }
 
   const hasBalance = (noteBal.data ?? BigInt(0)) >= parsedUnits
-  const simErr = postOffer.error ?? approveNote.error
 
   function run(stepName: PostStep, req: Parameters<typeof tx.writeContract>[0] | undefined) {
     if (!req) return
@@ -189,12 +201,6 @@ export function DvPPostOffer({ onPosted }: { onPosted?: () => void }) {
         </NeoButton>
       </div>
 
-      {tx.isSuccess && step === 'post' && (
-        <p className="ok">Offer posted — refresh book below.</p>
-      )}
-      {simErr && tx.phase === 'idle' && (
-        <p className="error" style={{ fontSize: 13 }}>{formatTxError(simErr)}</p>
-      )}
       <TxFeedback
         error={tx.error}
         onDismiss={() => {
@@ -202,7 +208,7 @@ export function DvPPostOffer({ onPosted }: { onPosted?: () => void }) {
           setStep('idle')
         }}
       />
-      <p className="neo-muted" style={{ fontSize: 12, marginTop: 8 }}>
+      <p className="neo-muted neo-text-xs neo-mt-sm">
         Escrow: <code>{addresses.dvpEscrow}</code> ·{' '}
         <a href={`${explorerUrl}/address/${addresses.dvpEscrow}`}>Monadscan</a>
       </p>

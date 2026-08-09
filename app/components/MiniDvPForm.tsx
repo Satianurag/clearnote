@@ -6,6 +6,8 @@ import { parseUnits } from 'viem'
 import { NeoButton } from '@/components/neo/NeoButton'
 import { TxFeedback } from '@/components/TxFeedback'
 import { useContractTx } from '@/hooks/useContractTx'
+import { useErrorToast, useSuccessToast } from '@/hooks/useErrorToast'
+import { useMonadNetworkToast } from '@/hooks/useMonadNetworkToast'
 import { addresses, chainId } from '@/lib/config'
 import { erc20Abi, miniDvpAbi } from '@/lib/contracts'
 import { monadTestnet } from '@/wagmi.config'
@@ -85,6 +87,18 @@ export function MiniDvPForm() {
     query: { enabled: Boolean(address && onMonad && productNote) },
   })
 
+  const simErr =
+    settle.error ? formatErr(settle.error) :
+    approveNote.error ? formatErr(approveNote.error) :
+    approveCash.error ? formatErr(approveCash.error) :
+    null
+  const simErrMsg = simErr && tx.phase === 'idle' ? simErr : null
+  const successMsg = tx.isSuccess ? 'Transaction confirmed on-chain' : null
+
+  useMonadNetworkToast()
+  useSuccessToast(successMsg)
+  useErrorToast(simErrMsg)
+
   if (!productNote) {
     return (
       <p className="warn">
@@ -95,13 +109,9 @@ export function MiniDvPForm() {
   }
 
   if (!address) return <p>Connect wallet to use MiniDvP.</p>
-  if (!onMonad) return <p className="error">Switch to Monad testnet first.</p>
-
-  const simErr =
-    settle.error ? formatErr(settle.error) :
-    approveNote.error ? formatErr(approveNote.error) :
-    approveCash.error ? formatErr(approveCash.error) :
-    null
+  if (!onMonad) {
+    return <p className="neo-muted">Connect wallet on Monad testnet to continue.</p>
+  }
 
   function runAction(action: DvpAction, request: Parameters<typeof tx.writeContract>[0] | undefined) {
     if (!request) return
@@ -127,7 +137,7 @@ export function MiniDvPForm() {
         CLINV01 balance: {noteBal.data?.toString() ?? '—'} · aUSDC balance:{' '}
         {cashBal.data?.toString() ?? '—'}
       </p>
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
+      <div className="neo-btn-row">
         <NeoButton
           variant="secondary"
           disabled={!approveNote.data || tx.isBusy}
@@ -150,8 +160,6 @@ export function MiniDvPForm() {
           {labelFor('settle', 'Settle (MiniDvP)')}
         </NeoButton>
       </div>
-      {tx.isSuccess && <p className="ok">Transaction confirmed on-chain</p>}
-      {simErr && tx.phase === 'idle' && <pre className="error-pre">{simErr}</pre>}
       <TxFeedback
         error={tx.error}
         onDismiss={() => {

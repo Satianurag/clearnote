@@ -6,10 +6,10 @@ import { useAccount } from 'wagmi'
 import { NeoCard } from '@/components/neo/NeoCard'
 import { clearNotePolicyAbi } from '@/lib/contracts'
 import { addresses, demoWallets, rpcUrl } from '@/lib/config'
+import { DEFAULT_INSPECT_UNITS } from '@/lib/inspect'
 import { REASON_CODES } from '@/lib/reasonCodes'
 
 const client = createPublicClient({ transport: http(rpcUrl) })
-const AMOUNT = BigInt('1000000000000000000')
 
 function formatSelector(code: string): string {
   const hex = code.startsWith('0x') ? code : `0x${code}`
@@ -42,7 +42,7 @@ export function WalletComplianceCheck() {
           address: addresses.clearNotePolicy,
           abi: clearNotePolicyAbi,
           functionName: 'inspect',
-          args: [addresses.clinv01, from, to, AMOUNT],
+          args: [addresses.clinv01, from, to, DEFAULT_INSPECT_UNITS],
         })
         const sel = formatSelector(code as string)
         if (!cancelled) {
@@ -82,25 +82,27 @@ export function WalletComplianceCheck() {
 
   return (
     <NeoCard className="wallet-compliance-check">
-      <h2 className="dvp-section__title">Your connected wallet</h2>
-      <p className="neo-muted" style={{ fontSize: 14 }}>
+      <h2 className="wallet-compliance-check__title">Your connected wallet</h2>
+      <p className="neo-muted wallet-compliance-check__lead">
         CLINV01 transfer B (ref investor) → <code>{address}</code>
       </p>
       {row?.loading ? (
         <p>Inspecting policy…</p>
       ) : row ? (
-        <table style={{ borderCollapse: 'collapse', width: '100%' }}>
+        <table className="neo-table wallet-compliance-check__table">
           <tbody>
             <tr>
-              <td style={{ padding: '4px 8px 4px 0' }}>Result</td>
-              <td>{row.ok ? 'PASS' : 'DENY'}</td>
+              <th scope="row">Result</th>
+              <td className={row.ok ? 'ok' : 'error'}>{row.ok ? 'PASS' : 'DENY'}</td>
             </tr>
             <tr>
-              <td style={{ padding: '4px 8px 4px 0' }}>Selector</td>
-              <td><code>{row.code}</code></td>
+              <th scope="row">Selector</th>
+              <td>
+                <code>{row.code}</code>
+              </td>
             </tr>
             <tr>
-              <td style={{ padding: '4px 8px 4px 0' }}>Reason</td>
+              <th scope="row">Reason</th>
               <td>{row.reason}</td>
             </tr>
           </tbody>

@@ -1,23 +1,26 @@
 'use client'
 
-import { type BaseError } from 'viem'
+import { useEffect } from 'react'
 import { useWaitForTransactionReceipt, useWriteContract } from 'wagmi'
+import { useTxActivity } from '@/context/TxActivityContext'
+import { formatTxError } from '@/lib/tx-errors'
 
 export type TxPhase = 'idle' | 'signing' | 'confirming' | 'success' | 'error'
 
-export function formatTxError(error: Error | null | undefined): string {
-  if (!error) return 'Transaction failed'
-  const e = error as BaseError & { shortMessage?: string; cause?: { shortMessage?: string } }
-  return e.shortMessage ?? e.cause?.shortMessage ?? e.message ?? 'Transaction failed'
-}
+export { formatTxError, decodeTxError } from '@/lib/tx-errors'
 
 /**
  * Unified write + wait lifecycle so buttons never stick in loading after reject/revert.
  * Wagmi pattern: isPending = wallet prompt; receipt hook = on-chain confirmation.
  */
 export function useContractTx() {
+  const { trackTx } = useTxActivity()
   const { writeContract, data: txHash, isPending: isSigning, error: writeError, reset } =
     useWriteContract()
+
+  useEffect(() => {
+    if (txHash) trackTx(txHash)
+  }, [txHash, trackTx])
 
   const {
     isLoading: isConfirming,

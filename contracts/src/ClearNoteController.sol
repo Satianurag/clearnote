@@ -139,6 +139,10 @@ contract ClearNoteController is AccessControl {
         registry.markSettled(invoiceId);
     }
 
+    function markDefault(bytes32 invoiceId) external onlyRole(ISSUER_ROLE) {
+        registry.markDefaulted(invoiceId);
+    }
+
     /// @notice Move notes from a lost wallet to a replacement wallet (supervised admin flow).
     /// @dev Frozen wallets cannot burn — Cleanverse BASE reverts burn with `0x322fde89`.
     ///      Supervised 3-step runbook (Safe multisig):

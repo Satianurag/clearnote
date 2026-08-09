@@ -20,11 +20,11 @@ export async function POST(req: Request) {
   const validation = validatePintXmlString(xml)
   const { excluded } = canonicalize(xml)
   const docHash = docHashFromXml(xml)
-  const fields = parseInvoiceFields(xml)
+  const parsed = parseInvoiceFields(xml)
 
   const pintProfileHashVal =
-    fields.profileId && fields.customizationId
-      ? pintProfileHash(fields.profileId, fields.customizationId)
+    parsed.profileId && parsed.customizationId
+      ? pintProfileHash(parsed.profileId, parsed.customizationId)
       : null
 
   return NextResponse.json({
@@ -32,6 +32,15 @@ export async function POST(req: Request) {
     pintProfileHash: pintProfileHashVal,
     validation,
     excluded,
-    fields,
+    fields: {
+      invoiceId: parsed.invoiceId,
+      profileId: parsed.profileId,
+      customizationId: parsed.customizationId,
+      issueDate: parsed.issueDate,
+      dueDate: parsed.dueDate,
+      currency: parsed.currency,
+      obligorName: parsed.obligorName,
+      faceValue: parsed.faceValue != null ? parsed.faceValue.toString() : null,
+    },
   })
 }

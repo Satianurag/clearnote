@@ -17,7 +17,36 @@ export const REASON_CODES: Record<string, string> = {
   "0xaecc0dbe": "A-Pass expired (Cleanverse)",
 };
 
+export type ReasonEnforcer = 'Cleanverse' | 'ClearNote'
+export type ReasonLayer = 'BASE router' | 'Decorator policy'
+
+export type ReasonCodeMeta = {
+  label: string
+  enforcedBy: ReasonEnforcer
+  layer: ReasonLayer
+}
+
+const CLEANVERSE_SELECTORS = new Set([
+  '0xa6725971',
+  '0x322fde89',
+  '0x51d86cca',
+  '0xaecc0dbe',
+])
+
+export const REASON_CODE_META: Record<string, ReasonCodeMeta> = Object.fromEntries(
+  Object.entries(REASON_CODES).map(([selector, label]) => {
+    const enforcedBy: ReasonEnforcer = CLEANVERSE_SELECTORS.has(selector) ? 'Cleanverse' : 'ClearNote'
+    const layer: ReasonLayer = enforcedBy === 'Cleanverse' ? 'BASE router' : 'Decorator policy'
+    return [selector, { label, enforcedBy, layer }]
+  }),
+)
+
 export function reasonForSelector(selector: string): string | undefined {
   const normalized = selector.toLowerCase();
   return REASON_CODES[normalized] ?? REASON_CODES[selector];
+}
+
+export function reasonMetaForSelector(selector: string): ReasonCodeMeta | undefined {
+  const normalized = selector.toLowerCase()
+  return REASON_CODE_META[normalized] ?? REASON_CODE_META[selector]
 }

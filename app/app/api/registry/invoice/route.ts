@@ -26,6 +26,7 @@ export async function GET(request: NextRequest) {
     faceValue: inv.faceValue.toString(),
     dueDate: inv.dueDate.toString(),
     registeredAt: inv.registeredAt.toString(),
+    currency: inv.currency,
     status,
     statusLabel: INVOICE_STATUS[status] ?? `Unknown (${status})`,
   })

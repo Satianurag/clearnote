@@ -3,24 +3,28 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import { ConnectWallet } from '@/components/ConnectWallet'
+import { PendingTxBadge } from '@/context/TxActivityContext'
+import './landing-header.css'
 
 const MARQUEE_TEXT = 'TURN INVOICES INTO CASH • REAL TRADE • NO FRAUD • NO WAITING • '
 
-const NAV = [
+const MARKETING_NAV = [
   { href: '/#how', label: 'How it works' },
   { href: '/#proof', label: 'Live proof' },
   { href: '/#why', label: 'Why different' },
 ] as const
 
 type Props = {
-  /** Landing: yellow CTA to /onboard. Onboard: wallet connect instead. */
-  variant?: 'landing' | 'onboard'
+  /** Only `landing` (static marketing page) shows the Get started CTA. */
+  variant?: 'landing' | 'onboard' | 'product'
   getStartedHref?: string
 }
 
-/** Header + top marquee copied from `public/landing.html` (neobrutalist chrome). */
-export function LandingHeader({ variant = 'landing', getStartedHref = '/onboard' }: Props) {
+/** Shared neobrutalist header — landing, onboard, and all product pages. */
+export function LandingHeader({ variant = 'onboard', getStartedHref = '/onboard' }: Props) {
   const [menuOpen, setMenuOpen] = useState(false)
+  const showGetStarted = variant === 'landing'
+  const showWallet = variant === 'onboard' || variant === 'product'
 
   function closeMenu() {
     setMenuOpen(false)
@@ -54,7 +58,7 @@ export function LandingHeader({ variant = 'landing', getStartedHref = '/onboard'
             </Link>
 
             <nav className="lh-nav" aria-label="Primary">
-              {NAV.map((item) => (
+              {MARKETING_NAV.map((item) => (
                 <Link key={item.href} href={item.href} className="lh-nav__link">
                   {item.label}
                 </Link>
@@ -70,15 +74,16 @@ export function LandingHeader({ variant = 'landing', getStartedHref = '/onboard'
               >
                 GitHub
               </a>
-              {variant === 'onboard' ? (
+              {showWallet ? (
                 <div className="lh-actions__wallet">
+                  {variant === 'product' && <PendingTxBadge />}
                   <ConnectWallet />
                 </div>
-              ) : (
+              ) : showGetStarted ? (
                 <Link href={getStartedHref} className="lh-btn lh-btn--primary" onClick={closeMenu}>
                   Get started
                 </Link>
-              )}
+              ) : null}
               <button
                 type="button"
                 className="lh-menu-toggle"
@@ -93,7 +98,7 @@ export function LandingHeader({ variant = 'landing', getStartedHref = '/onboard'
 
           {menuOpen && (
             <nav className="lh-mobile-nav" aria-label="Mobile">
-              {NAV.map((item) => (
+              {MARKETING_NAV.map((item) => (
                 <Link key={item.href} href={item.href} className="lh-mobile-nav__link" onClick={closeMenu}>
                   {item.label}
                 </Link>

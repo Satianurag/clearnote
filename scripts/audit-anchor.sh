@@ -21,4 +21,4 @@ DATA=$(cast calldata "anchor(bytes32,string,uint64,uint64)" "$PACK_HASH" "$URI" 
 echo "=== Safe anchor audit pack $ID hash=$PACK_HASH ==="
 TX=$(bash "$SAFE_EXEC" "$ANCHOR" "$DATA")
 echo "anchor: $TX"
-jq ".e2e.auditAnchor_${ID} = \"$TX\"" "$DEPLOY" > "${DEPLOY}.tmp" && mv "${DEPLOY}.tmp" "$DEPLOY"
+jq --arg tx "$TX" --arg id "$ID" '.e2e["auditAnchor_\($id)"] = $tx' "$DEPLOY" > "${DEPLOY}.tmp" && mv "${DEPLOY}.tmp" "$DEPLOY"

@@ -21,6 +21,9 @@ contracts:
       - event: DuplicateAttempted(bytes32 indexed invoiceId, address wouldBeOriginator, address existingOriginator)
       - event: ObligorAccepted(bytes32 indexed invoiceId, address indexed obligor, uint256 deadline)
       - event: InvoiceFinanced(bytes32 indexed invoiceId, address indexed noteToken, uint256 units)
+      - event: InvoiceSettled(bytes32 indexed invoiceId)
+      - event: InvoiceDefaulted(bytes32 indexed invoiceId)
+      - event: DisputeRaised(bytes32 indexed invoiceId, bytes32 evidenceHash)
   - name: ClearNoteController
     handler: ./src/EventHandlers.js
     events:

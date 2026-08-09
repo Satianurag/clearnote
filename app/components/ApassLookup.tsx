@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useErrorToast } from '@/hooks/useErrorToast'
 
 type ApassResult = {
   ok: boolean
@@ -14,6 +15,8 @@ export function ApassLookup() {
   const [result, setResult] = useState<ApassResult | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+
+  useErrorToast(error)
 
   async function lookup() {
     setLoading(true)
@@ -41,19 +44,18 @@ export function ApassLookup() {
   return (
     <div>
       <p className="muted">Query Cleanverse sandbox CVI — credentials stay server-side.</p>
-      <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
+      <div className="apass-lookup__row">
         <input
           type="text"
+          className="apass-lookup__input"
           placeholder="0x… wallet address"
           value={address}
           onChange={(e) => setAddress(e.target.value)}
-          style={{ flex: 1, minWidth: 280, padding: 8 }}
         />
         <button type="button" onClick={lookup} disabled={loading || !address.trim()}>
           {loading ? 'Querying…' : 'Query A-Pass'}
         </button>
       </div>
-      {error && <p className="error">{error}</p>}
       {result && (
         <pre className="code-block">{JSON.stringify(result, null, 2)}</pre>
       )}

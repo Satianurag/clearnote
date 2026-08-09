@@ -1,78 +1,73 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
-import { createPublicClient, http, getAddress } from 'viem'
+import { useCallback, useEffect, useState } from 'react'
+import { getAddress } from 'viem'
 import { WalletComplianceCheck } from '@/components/WalletComplianceCheck'
 import { NeoCard } from '@/components/neo/NeoCard'
-import { REASON_CODES } from '@/lib/reasonCodes'
-import { addresses, demoWallets, rpcUrl } from '@/lib/config'
-import { clearNotePolicyAbi } from '@/lib/contracts'
+import {
+  COMPLIANCE_REF_WALLETS,
+  inspectTransfer,
+  REF_SANCTIONED,
+  type InspectRow,
+} from '@/lib/compliance-inspect'
+import { DEFAULT_INSPECT_UNITS } from '@/lib/inspect'
+import { REASON_CODE_META } from '@/lib/reasonCodes'
+import { addresses } from '@/lib/config'
+import { useErrorToast } from '@/hooks/useErrorToast'
 
-const WALLETS = [
-  { label: 'Ref: issuer', addr: demoWallets.a },
-  { label: 'Ref: investor', addr: demoWallets.b },
-  { label: 'Ref: investor B2', addr: demoWallets.b2 },
-  { label: 'Ref: frozen', addr: demoWallets.c },
-  { label: 'Ref: tier-low', addr: demoWallets.e },
-  { label: 'Ref: no A-Pass', addr: demoWallets.dead },
-  { label: 'Ref: sanctioned', addr: '0x1111111111111111111111111111111111111111' },
-]
+const REASON_ROWS = Object.entries(REASON_CODE_META).sort(([a], [b]) => a.localeCompare(b))
 
-const REASON_ROWS = Object.entries(REASON_CODES).sort(([a], [b]) => a.localeCompare(b))
-const client = createPublicClient({ transport: http(rpcUrl) })
-
-function formatSelector(code: string): string {
-  const hex = code.startsWith('0x') ? code : `0x${code}`
-  return hex.length >= 10 ? hex.slice(0, 10) : hex
+function emptyRows(): InspectRow[] {
+  return COMPLIANCE_REF_WALLETS.map((w) => ({
+    wallet: w.label,
+    to: getAddress(w.addr),
+    ok: false,
+    code: '…',
+    reason: 'Loading…',
+    enforcedBy: '…',
+    layer: '…',
+  }))
 }
 
 export default function ComplianceMatrixPage() {
-  const [rows, setRows] = useState<Array<{ wallet: string; ok: boolean; code: string; reason: string }>>([])
+  const [rows, setRows] = useState<InspectRow[]>(emptyRows)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useErrorToast(error)
+
+  const runInspect = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    setRows(emptyRows())
+
+    const from = getAddress(COMPLIANCE_REF_WALLETS[1].addr)
+    const amount = DEFAULT_INSPECT_UNITS
+
+    const tasks = COMPLIANCE_REF_WALLETS.map((w, idx) =>
+      inspectTransfer(w.label, getAddress(w.addr), from, amount).then((row) => {
+        setRows((prev) => {
+          const next = [...prev]
+          next[idx] = row
+          return next
+        })
+      }),
+    )
+
+    const results = await Promise.allSettled(tasks)
+    const failures = results.filter((r) => r.status === 'rejected')
+    if (failures.length > 0) {
+      setError(`${failures.length} inspect call(s) failed unexpectedly`)
+    }
+    setLoading(false)
+  }, [])
 
   useEffect(() => {
-    let cancelled = false
-    async function run() {
-      const from = getAddress(WALLETS[1].addr)
-      const amount = BigInt('1000000000000000000')
-      const out: typeof rows = []
-      for (const w of WALLETS) {
-        const to = getAddress(w.addr)
-        try {
-          const [ok, code, reasonText] = await client.readContract({
-            address: addresses.clearNotePolicy,
-            abi: clearNotePolicyAbi,
-            functionName: 'inspect',
-            args: [addresses.clinv01, from, to, amount],
-          })
-          const sel = formatSelector(code as string)
-          out.push({
-            wallet: w.label,
-            ok: ok as boolean,
-            code: sel,
-            reason:
-              REASON_CODES[sel.toLowerCase()] ??
-              (typeof reasonText === 'string' && reasonText.length > 0
-                ? reasonText
-                : ok
-                  ? 'Transfer permitted'
-                  : sel),
-          })
-        } catch (e) {
-          out.push({ wallet: w.label, ok: false, code: 'error', reason: String(e) })
-        }
-      }
-      if (!cancelled) {
-        setRows(out)
-        setLoading(false)
-      }
-    }
-    run()
-    return () => {
-      cancelled = true
-    }
-  }, [])
+    runInspect()
+  }, [runInspect])
+
+  const pendingCount = rows.filter((r) => r.code === '…').length
 
   return (
     <div className="product-page compliance-matrix">
@@ -83,56 +78,78 @@ export default function ComplianceMatrixPage() {
         </p>
         <p className="compliance-matrix__meta neo-muted">
           Policy <code>{addresses.clearNotePolicy}</code> · token <code>{addresses.clinv01}</code>
+          {' · '}
+          Sanctioned ref from US Treasury SDN list (<code>{REF_SANCTIONED}</code>)
         </p>
       </header>
 
       <WalletComplianceCheck />
 
       <NeoCard>
-        <h2 className="dvp-section__title">Reference wallets</h2>
-        {loading ? (
-          <p className="neo-muted">Loading inspect results…</p>
-        ) : (
-          <table className="neo-table">
-            <thead>
-              <tr>
-                <th>Wallet</th>
-                <th>Result</th>
-                <th>Selector</th>
-                <th>Reason</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r) => (
-                <tr key={r.wallet}>
-                  <td>{r.wallet}</td>
-                  <td className={r.ok ? 'ok' : 'error'}>{r.ok ? 'PASS' : 'DENY'}</td>
-                  <td><code>{r.code}</code></td>
-                  <td>{r.reason}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="compliance-matrix__toolbar">
+          <h2 className="dvp-section__title">Reference wallets</h2>
+          <button type="button" className="neo-btn neo-btn--secondary neo-btn--sm" onClick={runInspect} disabled={loading}>
+            {loading ? 'Refreshing…' : 'Retry all'}
+          </button>
+        </div>
+        {loading && pendingCount > 0 && (
+          <p className="neo-muted">
+            Inspecting {COMPLIANCE_REF_WALLETS.length - pendingCount}/{COMPLIANCE_REF_WALLETS.length} wallets…
+          </p>
         )}
+        <table className="neo-table">
+          <thead>
+            <tr>
+              <th scope="col">Wallet</th>
+              <th scope="col">Result</th>
+              <th scope="col">Selector</th>
+              <th scope="col">Enforced by</th>
+              <th scope="col">Layer</th>
+              <th scope="col">Reason</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r) => (
+              <tr key={r.wallet}>
+                <td>{r.wallet}</td>
+                <td className={r.code === '…' ? 'neo-muted' : r.ok ? 'ok' : 'error'}>
+                  {r.code === '…' ? '…' : r.ok ? 'PASS' : 'DENY'}
+                </td>
+                <td>
+                  <code>{r.code}</code>
+                </td>
+                <td>{r.code === '…' ? '…' : r.enforcedBy}</td>
+                <td className="neo-muted">{r.code === '…' ? '…' : r.layer}</td>
+                <td>{r.reason}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </NeoCard>
 
       <NeoCard>
         <h2 className="dvp-section__title">Reason code registry</h2>
         <p className="neo-muted compliance-matrix__registry-note">
-          Static map from <code>app/lib/reasonCodes.ts</code>
+          Typed selectors surfaced by Cleanverse (BASE) and ClearNote policy (decorator).
         </p>
         <table className="neo-table">
           <thead>
             <tr>
-              <th>Selector</th>
-              <th>Meaning</th>
+              <th scope="col">Selector</th>
+              <th scope="col">Meaning</th>
+              <th scope="col">Enforced by</th>
+              <th scope="col">Layer</th>
             </tr>
           </thead>
           <tbody>
-            {REASON_ROWS.map(([sel, label]) => (
+            {REASON_ROWS.map(([sel, meta]) => (
               <tr key={sel}>
-                <td><code>{sel}</code></td>
-                <td>{label}</td>
+                <td>
+                  <code>{sel}</code>
+                </td>
+                <td>{meta.label}</td>
+                <td>{meta.enforcedBy}</td>
+                <td className="neo-muted">{meta.layer}</td>
               </tr>
             ))}
           </tbody>
@@ -140,7 +157,8 @@ export default function ComplianceMatrixPage() {
       </NeoCard>
 
       <p className="product-links">
-        <Link href="/compliance?tab=regulator">Regulator tab</Link> ·{' '}
+        <Link href="/compliance?tab=regulator">OFAC verifyInclusion</Link> ·{' '}
+        <Link href="/activity">Indexed activity</Link> ·{' '}
         <Link href="/exporter">Exporter</Link> · <Link href="/investor">Investor / DvP</Link>
       </p>
     </div>

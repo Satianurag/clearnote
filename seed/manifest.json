@@ -125,6 +125,76 @@
       "financeTarget": "0xb544d5efb15fbae3b3ad4b1ec3594ffeb0926593",
       "issueTx": "0xd9a286f0e897209bbf83e3b2f2c8574198f0f243fb6a325ebed3da20d3b88f3d",
       "note": "Post-redeploy v3.2 controller issueNote -> Safe (zero-balance holder); invoiceId from controllerIssueInvoiceId_v32"
+    },
+    {
+      "id": "INV-014",
+      "invoiceId": "0x36be38a24f978a290778bf3886fa70df0c09c8ae8760651eff4369fc81707798",
+      "file": "seed/invoices/INV-014.xml",
+      "status": "seed_only",
+      "note": "Demo Obligor Pte Ltd — SGD 125000.00 — upload via exporter"
+    },
+    {
+      "id": "INV-015",
+      "invoiceId": "0xa74567924357d987b713722028f01662da89fc398ba66b1508c8b9733aa6cbdd",
+      "file": "seed/invoices/INV-015.xml",
+      "status": "seed_only",
+      "note": "Straits Palm Trading Pte Ltd — SGD 89000.00 — upload via exporter"
+    },
+    {
+      "id": "INV-016",
+      "invoiceId": "0x7f1488fca07cb041ed76ec0378290be6a27d8f526116e4dd8b520cf70127d55e",
+      "file": "seed/invoices/INV-016.xml",
+      "status": "seed_only",
+      "note": "Bangkok Health Imports Co Ltd — USD 45000.00 — upload via exporter"
+    },
+    {
+      "id": "INV-017",
+      "invoiceId": "0x71e4f4f41e5f6f640990239244422b3e07847aa88e4315f71c4e791270eabc6a",
+      "file": "seed/invoices/INV-017.xml",
+      "status": "seed_only",
+      "note": "Penang Micro Fab Sdn Bhd — SGD 210000.00 — upload via exporter"
+    },
+    {
+      "id": "INV-018",
+      "invoiceId": "0x8e61fb53bbd8792d8159017f632b8262d159f1b497991670d2e4532fa3220744",
+      "file": "seed/invoices/INV-018.xml",
+      "status": "seed_only",
+      "note": "Jakarta Fashion Retail PT — SGD 67500.00 — upload via exporter"
+    },
+    {
+      "id": "INV-019",
+      "invoiceId": "0x31d4c4b6dadd4fcef1ca1587a790e7b0770bcbfac265d94dccc8339a6f0e86d4",
+      "file": "seed/invoices/INV-019.xml",
+      "status": "seed_only",
+      "note": "Perth Energy Services Pty Ltd — USD 156000.00 — upload via exporter"
+    },
+    {
+      "id": "INV-020",
+      "invoiceId": "0x05452d1dfb76f3fe81cc2b71023712706bfea493dd1a7155144540729498681a",
+      "file": "seed/invoices/INV-020.xml",
+      "status": "seed_only",
+      "note": "Saigon Beverages JSC — SGD 42000.00 — upload via exporter"
+    },
+    {
+      "id": "INV-021",
+      "invoiceId": "0x6b0a06b6180e88bd6c2470360c223490f3d7d53a8b5c3995c058b96f5eff9ca0",
+      "file": "seed/invoices/INV-021.xml",
+      "status": "seed_only",
+      "note": "Neptune Shipping Pte Ltd — SGD 38500.00 — upload via exporter"
+    },
+    {
+      "id": "INV-022",
+      "invoiceId": "0x0b3d34bd1de64ce67abbf8baefea8bb211cd2feb02f578772d8263302c557258",
+      "file": "seed/invoices/INV-022.xml",
+      "status": "seed_only",
+      "note": "Johor Industrial Park Sdn Bhd — SGD 98000.00 — upload via exporter"
+    },
+    {
+      "id": "INV-023",
+      "invoiceId": "0x292d00989c136c260a5dc24940f97fbafe538ba45a2052db8871c63daa0d4ff6",
+      "file": "seed/invoices/INV-023.xml",
+      "status": "seed_only",
+      "note": "Cleanverse Energy Pte Ltd — SGD 275000.00 — upload via exporter"
     }
   ],
   "wallets": {

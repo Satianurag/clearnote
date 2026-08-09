@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- PINT-SG trade receivable seed — INV-015 (upload via ClearNote exporter) -->
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+         xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+         xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+  <cbc:CustomizationID>urn:peppol:pint:billing-1@sg-1</cbc:CustomizationID>
+  <cbc:ProfileID>urn:peppol:bis:invoice_only:1</cbc:ProfileID>
+  <cbc:ID>INV-015</cbc:ID>
+  <cbc:IssueDate>2026-08-11</cbc:IssueDate>
+  <cbc:DueDate>2026-11-10</cbc:DueDate>
+  <cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>
+  <cbc:Note>CIF Port Klang — refined palm olein drums</cbc:Note>
+  <cbc:DocumentCurrencyCode>SGD</cbc:DocumentCurrencyCode>
+  <cac:OrderReference>
+    <cbc:ID>PO-SG-77210</cbc:ID>
+  </cac:OrderReference>
+  <cac:AccountingSupplierParty>
+    <cac:Party>
+      <cac:PartyName><cbc:Name>ClearNote Originator Ltd</cbc:Name></cac:PartyName>
+      <cac:PostalAddress>
+        <cbc:CityName>Singapore</cbc:CityName>
+        <cac:Country><cbc:IdentificationCode>SG</cbc:IdentificationCode></cac:Country>
+      </cac:PostalAddress>
+    </cac:Party>
+  </cac:AccountingSupplierParty>
+  <cac:AccountingCustomerParty>
+    <cac:Party>
+      <cac:PartyName><cbc:Name>Straits Palm Trading Pte Ltd</cbc:Name></cac:PartyName>
+      <cac:PostalAddress>
+        <cbc:CityName>Singapore</cbc:CityName>
+        <cac:Country><cbc:IdentificationCode>SG</cbc:IdentificationCode></cac:Country>
+      </cac:PostalAddress>
+    </cac:Party>
+  </cac:AccountingCustomerParty>
+  <!-- PayeeParty excluded from docHash — factoring party name varies per WO-04 -->
+  <cac:PayeeParty>
+    <cac:PartyName><cbc:Name>ASEAN Trade Finance</cbc:Name></cac:PartyName>
+  </cac:PayeeParty>
+  <cac:PaymentTerms>
+    <cbc:Note>Net 90 — trade receivable eligible for supply-chain finance on Monad testnet</cbc:Note>
+  </cac:PaymentTerms>
+  <cac:LegalMonetaryTotal>
+    <cbc:PayableAmount currencyID="SGD">89000.00</cbc:PayableAmount>
+  </cac:LegalMonetaryTotal>
+  <cac:InvoiceLine>
+    <cbc:ID>1</cbc:ID>
+    <cbc:InvoicedQuantity unitCode="C62">20</cbc:InvoicedQuantity>
+    <cbc:LineExtensionAmount currencyID="SGD">89000.00</cbc:LineExtensionAmount>
+    <cac:Item>
+      <cbc:Name>Palm olein 20MT drums</cbc:Name>
+    </cac:Item>
+    <cac:Price>
+      <cbc:PriceAmount currencyID="SGD">4450.00</cbc:PriceAmount>
+    </cac:Price>
+  </cac:InvoiceLine>
+</Invoice>

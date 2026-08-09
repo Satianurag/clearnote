@@ -134,6 +134,20 @@ contract ClearNoteControllerTest is Test {
         assertEq(uint8(registry.get(invoiceId).status), uint8(InvoiceRegistry.Status.Settled));
     }
 
+    function test_markDefault_afterFinance() public {
+        bytes32 invoiceId = keccak256("invoice-default");
+        _registerAndAccept(invoiceId);
+
+        vm.prank(issuer);
+        controller.issueNote(invoiceId, address(note), investor1, 1_000);
+        assertEq(uint8(registry.get(invoiceId).status), uint8(InvoiceRegistry.Status.Financed));
+
+        vm.prank(issuer);
+        controller.markDefault(invoiceId);
+        assertEq(uint8(registry.get(invoiceId).status), uint8(InvoiceRegistry.Status.Defaulted));
+        assertGt(note.balanceOf(investor1), 0);
+    }
+
     function test_humanCannotMint() public {
         vm.prank(issuer);
         vm.expectRevert();

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- PINT-SG trade receivable seed — INV-019 (upload via ClearNote exporter) -->
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+         xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+         xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+  <cbc:CustomizationID>urn:peppol:pint:billing-1@sg-1</cbc:CustomizationID>
+  <cbc:ProfileID>urn:peppol:bis:invoice_only:1</cbc:ProfileID>
+  <cbc:ID>INV-019</cbc:ID>
+  <cbc:IssueDate>2026-08-15</cbc:IssueDate>
+  <cbc:DueDate>2026-12-14</cbc:DueDate>
+  <cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>
+  <cbc:Note>FOB Singapore — LNG train spare valve assemblies</cbc:Note>
+  <cbc:DocumentCurrencyCode>USD</cbc:DocumentCurrencyCode>
+  <cac:OrderReference>
+    <cbc:ID>PO-AU-90214</cbc:ID>
+  </cac:OrderReference>
+  <cac:AccountingSupplierParty>
+    <cac:Party>
+      <cac:PartyName><cbc:Name>Offshore Systems Singapore Pte Ltd</cbc:Name></cac:PartyName>
+      <cac:PostalAddress>
+        <cbc:CityName>Singapore</cbc:CityName>
+        <cac:Country><cbc:IdentificationCode>SG</cbc:IdentificationCode></cac:Country>
+      </cac:PostalAddress>
+    </cac:Party>
+  </cac:AccountingSupplierParty>
+  <cac:AccountingCustomerParty>
+    <cac:Party>
+      <cac:PartyName><cbc:Name>Perth Energy Services Pty Ltd</cbc:Name></cac:PartyName>
+      <cac:PostalAddress>
+        <cbc:CityName>Singapore</cbc:CityName>
+        <cac:Country><cbc:IdentificationCode>SG</cbc:IdentificationCode></cac:Country>
+      </cac:PostalAddress>
+    </cac:Party>
+  </cac:AccountingCustomerParty>
+  <!-- PayeeParty excluded from docHash — factoring party name varies per WO-04 -->
+  <cac:PayeeParty>
+    <cac:PartyName><cbc:Name>Pacific Rim Factors</cbc:Name></cac:PartyName>
+  </cac:PayeeParty>
+  <cac:PaymentTerms>
+    <cbc:Note>Net 90 — trade receivable eligible for supply-chain finance on Monad testnet</cbc:Note>
+  </cac:PaymentTerms>
+  <cac:LegalMonetaryTotal>
+    <cbc:PayableAmount currencyID="USD">156000.00</cbc:PayableAmount>
+  </cac:LegalMonetaryTotal>
+  <cac:InvoiceLine>
+    <cbc:ID>1</cbc:ID>
+    <cbc:InvoicedQuantity unitCode="C62">24</cbc:InvoicedQuantity>
+    <cbc:LineExtensionAmount currencyID="USD">156000.00</cbc:LineExtensionAmount>
+    <cac:Item>
+      <cbc:Name>Cryogenic valve kits — LNG service</cbc:Name>
+    </cac:Item>
+    <cac:Price>
+      <cbc:PriceAmount currencyID="USD">6500.00</cbc:PriceAmount>
+    </cac:Price>
+  </cac:InvoiceLine>
+</Invoice>

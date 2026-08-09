@@ -1,0 +1,6 @@
+{
+  "ok": true,
+  "method": "structural",
+  "errors": [],
+  "svrlNote": "Saxon SVRL skipped — structural checks only (set SAXON_CP for full SVRL)"
+}

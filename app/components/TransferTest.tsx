@@ -5,6 +5,7 @@ import { parseUnits, type Address } from 'viem'
 import { NeoButton } from '@/components/neo/NeoButton'
 import { TxFeedback } from '@/components/TxFeedback'
 import { useContractTx } from '@/hooks/useContractTx'
+import { useErrorToast, useSuccessToast } from '@/hooks/useErrorToast'
 import { addresses, chainId, demoWallets } from '@/lib/config'
 import { erc20Abi } from '@/lib/contracts'
 import { monadTestnet } from '@/wagmi.config'
@@ -47,6 +48,13 @@ function TransferButton({
 
   const simMsg = sim.isError ? formatErr(sim.error) : ''
   const hint = simMsg ? decodeHint(simMsg) : null
+  const simToastErr =
+    simMsg && tx.phase === 'idle' ? (hint ? `${simMsg} — ${hint}` : simMsg) : null
+  const successMsg = tx.isSuccess ? 'Transfer confirmed on-chain' : null
+
+  useErrorToast(simToastErr)
+  useSuccessToast(successMsg)
+
   const canSend = Boolean(sim.data && onMonad && !tx.isBusy)
 
   const buttonLabel = tx.isSigning
@@ -71,13 +79,6 @@ function TransferButton({
       </NeoButton>
       {sim.isSuccess && tx.phase === 'idle' && !tx.error && (
         <p className="ok">Pre-flight OK — safe to sign</p>
-      )}
-      {tx.isSuccess && <p className="ok">Transfer confirmed on-chain</p>}
-      {simMsg && tx.phase === 'idle' && (
-        <pre className="error-pre">
-          {simMsg}
-          {hint && <div className="hint">{hint}</div>}
-        </pre>
       )}
       <TxFeedback error={tx.error} onDismiss={() => tx.reset()} />
       {expectPass && sim.isError && (

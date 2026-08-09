@@ -1,6 +1,6 @@
 import { monadTestnet as viemMonadTestnet } from 'viem/chains'
 import { createConfig, createStorage, http } from 'wagmi'
-import { injected } from '@wagmi/core'
+import { injected, walletConnect } from 'wagmi/connectors'
 import { rpcUrl } from './lib/config'
 
 // Constraints: import from viem/chains; explorer must be monadscan (not monadexplorer default).
@@ -14,9 +14,24 @@ export const monadTestnet = {
   },
 }
 
+const walletConnectProjectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID?.trim()
+
+const connectors = [
+  injected(),
+  ...(walletConnectProjectId
+    ? [
+        walletConnect({
+          projectId: walletConnectProjectId,
+          showQrModal: true,
+        }),
+      ]
+    : []),
+]
+
 export const config = createConfig({
   chains: [monadTestnet],
-  connectors: [injected()],
+  multiInjectedProviderDiscovery: true,
+  connectors,
   transports: {
     [monadTestnet.id]: http(),
   },

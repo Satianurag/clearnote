@@ -1,8 +1,10 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { useConnect, useDisconnect, useSwitchChain } from 'wagmi'
 import { monadTestnet } from '@/wagmi.config'
 import { formatTxError } from '@/hooks/useContractTx'
+import { useErrorToast } from '@/hooks/useErrorToast'
 import { useWalletSession } from '@/hooks/useWalletSession'
 
 function shortAddress(address: string) {
@@ -10,10 +12,22 @@ function shortAddress(address: string) {
 }
 
 export function ConnectWallet() {
+  const [mounted, setMounted] = useState(false)
   const { address, phase } = useWalletSession()
   const { connect, connectors, isPending, error: connectError, reset: resetConnect } = useConnect()
   const { disconnect } = useDisconnect()
   const { switchChain, isPending: switching, error: switchError, reset: resetSwitch } = useSwitchChain()
+
+  useEffect(() => setMounted(true), [])
+
+  useErrorToast(connectError ? formatTxError(connectError) : null, 'Wallet')
+  useErrorToast(switchError ? formatTxError(switchError) : null, 'Network')
+
+  if (!mounted) {
+    return <span className="connect-wallet__status">Connect wallet</span>
+  }
+
+  const readyConnectors = connectors.filter((c) => c.ready !== false)
 
   if (phase === 'restoring') {
     return <span className="connect-wallet__status">Restoring wallet…</span>
@@ -53,16 +67,35 @@ export function ConnectWallet() {
         <button type="button" className="neo-btn neo-btn--ghost neo-btn--sm" onClick={() => disconnect()}>
           Disconnect
         </button>
-        {switchError && (
-          <p className="connect-wallet__error" role="alert">
-            {formatTxError(switchError)}
-          </p>
-        )}
       </div>
     )
   }
 
-  const connector = connectors[0]
+  if (readyConnectors.length > 1) {
+    return (
+      <div className="connect-wallet connect-wallet--prompt connect-wallet--multi">
+        <span className="connect-wallet__label">Choose wallet</span>
+        <div className="connect-wallet__list">
+          {readyConnectors.map((connector) => (
+            <button
+              key={connector.uid}
+              type="button"
+              className="neo-btn neo-btn--secondary neo-btn--sm"
+              disabled={isPending}
+              onClick={() => {
+                resetConnect()
+                connect({ connector, chainId: monadTestnet.id })
+              }}
+            >
+              {isPending ? 'Connecting…' : connector.name}
+            </button>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  const connector = readyConnectors[0]
   return (
     <div className="connect-wallet connect-wallet--prompt">
       <button
@@ -74,13 +107,8 @@ export function ConnectWallet() {
           if (connector) connect({ connector, chainId: monadTestnet.id })
         }}
       >
-        {isPending ? 'Connecting…' : 'Connect wallet'}
+        {isPending ? 'Connecting…' : connector ? `Connect ${connector.name}` : 'Connect wallet'}
       </button>
-      {connectError && (
-        <p className="connect-wallet__error" role="alert">
-          {formatTxError(connectError)}
-        </p>
-      )}
     </div>
   )
 }

@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react'
 import { LandingHeader } from '@/components/LandingHeader'
-import './landing-header.css'
 
 export function OnboardShell({ children }: { children: ReactNode }) {
   return (

@@ -8,6 +8,7 @@ import { ApassGenerate } from '@/components/ApassGenerate'
 import { NeoButton } from '@/components/neo/NeoButton'
 import { useWalletSession } from '@/hooks/useWalletSession'
 import { PERSONAS, personaById, type PersonaId } from '@/lib/personas'
+import { setStoredPersona } from '@/lib/persona-session'
 
 const PERSONA_VISUAL: Record<PersonaId, { num: string; glyph: string }> = {
   exporter: { num: '01', glyph: 'EX' },
@@ -24,6 +25,7 @@ function OnboardContent() {
   const searchParams = useSearchParams()
   const { address, isReady, isRestoring, isConnecting, phase } = useWalletSession()
   const [selected, setSelected] = useState<PersonaId | null>(null)
+  const [hasApass, setHasApass] = useState(false)
 
   useEffect(() => {
     const fromUrl = searchParams.get('role')
@@ -32,15 +34,21 @@ function OnboardContent() {
   }, [searchParams])
 
   const active = personaById(selected)
-  const step = !selected ? 1 : !isReady ? 2 : 3
+  const apassRequired = active?.id === 'investor' || active?.id === 'compliance'
+  const canLaunch = Boolean(active && isReady && (!apassRequired || hasApass))
+
+  const step = !selected ? 1 : !isReady ? 2 : canLaunch ? 4 : 3
 
   function selectPersona(id: PersonaId) {
     setSelected(id)
+    setHasApass(false)
+    setStoredPersona(id)
     router.replace(`/onboard?role=${id}`, { scroll: false })
   }
 
   function continueToApp() {
-    if (!active) return
+    if (!active || !canLaunch) return
+    setStoredPersona(active.id)
     router.push(active.href)
   }
 
@@ -71,6 +79,14 @@ function OnboardContent() {
           className={`onboard-stepper__item ${step >= 3 ? 'onboard-stepper__item--done' : ''} ${step === 3 ? 'onboard-stepper__item--current' : ''}`}
         >
           <span className="onboard-stepper__num">3</span>
+          <span className="onboard-stepper__label">
+            {apassRequired ? 'Get A-Pass' : 'A-Pass (optional)'}
+          </span>
+        </li>
+        <li
+          className={`onboard-stepper__item ${step >= 4 ? 'onboard-stepper__item--done' : ''} ${step === 4 ? 'onboard-stepper__item--current' : ''}`}
+        >
+          <span className="onboard-stepper__num">4</span>
           <span className="onboard-stepper__label">Launch app</span>
         </li>
       </ol>
@@ -163,9 +179,14 @@ function OnboardContent() {
       {isReady && address && (
         <section className="onboard-section" aria-labelledby="onboard-apass-title">
           <h2 id="onboard-apass-title" className="onboard-section__title">
-            A-Pass (optional)
+            {apassRequired ? 'A-Pass (required)' : 'A-Pass (optional)'}
           </h2>
-          <ApassGenerate />
+          {apassRequired && !hasApass && (
+            <p className="onboard-section__sub">
+              Generate or verify an existing A-Pass before opening {active?.title ?? 'the app'}.
+            </p>
+          )}
+          <ApassGenerate required={apassRequired} onStatusChange={setHasApass} />
         </section>
       )}
 
@@ -175,9 +196,15 @@ function OnboardContent() {
             <h2 id="onboard-launch-title" className="onboard-launch__title">
               Enter as {active.title}
             </h2>
-            <NeoButton className="onboard-launch__btn" onClick={continueToApp}>
-              Open {active.title} →
-            </NeoButton>
+            {apassRequired && !hasApass ? (
+              <p className="onboard-launch__gate neo-muted">
+                Complete A-Pass onboarding above to continue.
+              </p>
+            ) : (
+              <NeoButton className="onboard-launch__btn" onClick={continueToApp}>
+                Open {active.title} →
+              </NeoButton>
+            )}
           </div>
         </section>
       )}
@@ -186,7 +213,7 @@ function OnboardContent() {
         <Link href="/dashboard">Dashboard</Link>
       </footer>
 
-      {active && isReady && (
+      {active && isReady && canLaunch && (
         <div className="onboard-sticky-cta">
           <NeoButton className="onboard-sticky-cta__btn" onClick={continueToApp}>
             Open {active.title} →

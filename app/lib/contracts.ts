@@ -96,6 +96,23 @@ export const invoiceRegistryAbi = [
     ],
     outputs: [],
   },
+  {
+    name: 'backingOf',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [{ name: 'noteToken', type: 'address' }],
+    outputs: [{ name: 'invoiceId', type: 'bytes32' }],
+  },
+  {
+    name: 'raiseDispute',
+    type: 'function',
+    stateMutability: 'nonpayable',
+    inputs: [
+      { name: 'invoiceId', type: 'bytes32' },
+      { name: 'evidenceHash', type: 'bytes32' },
+    ],
+    outputs: [],
+  },
 ] as const
 
 export const clearNoteControllerAbi = [
@@ -110,6 +127,30 @@ export const clearNoteControllerAbi = [
       { name: 'units', type: 'uint256' },
     ],
     outputs: [],
+  },
+  {
+    name: 'settle',
+    type: 'function',
+    stateMutability: 'nonpayable',
+    inputs: [
+      { name: 'invoiceId', type: 'bytes32' },
+      { name: 'noteToken', type: 'address' },
+    ],
+    outputs: [],
+  },
+  {
+    name: 'markDefault',
+    type: 'function',
+    stateMutability: 'nonpayable',
+    inputs: [{ name: 'invoiceId', type: 'bytes32' }],
+    outputs: [],
+  },
+  {
+    name: 'primaryHolder',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [{ name: 'noteToken', type: 'address' }],
+    outputs: [{ type: 'address' }],
   },
   {
     name: 'lockedUntil',
@@ -206,6 +247,44 @@ export const clearNotePolicyAbi = [
   },
 ] as const
 
+export const sanctionsRegistryAbi = [
+  {
+    name: 'verifyInclusion',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [
+      { name: 'who', type: 'address' },
+      { name: 'proof', type: 'bytes32[]' },
+    ],
+    outputs: [{ type: 'bool' }],
+  },
+  {
+    name: 'isSanctioned',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [{ name: 'who', type: 'address' }],
+    outputs: [{ type: 'bool' }],
+  },
+  {
+    name: 'rootCount',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [],
+    outputs: [{ type: 'uint256' }],
+  },
+  {
+    name: 'rootAt',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [{ name: 'index', type: 'uint256' }],
+    outputs: [
+      { name: 'root', type: 'bytes32' },
+      { name: 'sourceUri', type: 'string' },
+      { name: 'publishedAt', type: 'uint64' },
+    ],
+  },
+] as const
+
 export const miniDvpAbi = [
   {
     name: 'settle',
@@ -220,5 +299,39 @@ export const miniDvpAbi = [
       { name: 'cashAmt', type: 'uint256' },
     ],
     outputs: [],
+  },
+] as const
+
+export const auditAnchorAbi = [
+  {
+    name: 'anchorCount',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [],
+    outputs: [{ type: 'uint256' }],
+  },
+  {
+    name: 'anchors',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [{ name: '', type: 'uint256' }],
+    outputs: [
+      { name: 'packHash', type: 'bytes32' },
+      { name: 'uri', type: 'string' },
+      { name: 'periodStart', type: 'uint64' },
+      { name: 'periodEnd', type: 'uint64' },
+      { name: 'anchoredAt', type: 'uint64' },
+    ],
+  },
+  {
+    name: 'Anchored',
+    type: 'event',
+    inputs: [
+      { name: 'anchorId', type: 'uint256', indexed: true },
+      { name: 'packHash', type: 'bytes32', indexed: true },
+      { name: 'uri', type: 'string', indexed: false },
+      { name: 'periodStart', type: 'uint64', indexed: false },
+      { name: 'periodEnd', type: 'uint64', indexed: false },
+    ],
   },
 ] as const

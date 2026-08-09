@@ -5,14 +5,12 @@ let cached: Record<string, string> | null = null
 
 function loadKeysFile(): Record<string, string> {
   if (cached) return cached
-  const candidates = [
-    path.resolve(process.cwd(), '..', 'clearnote.keys.env'),
-    path.resolve(process.cwd(), 'clearnote.keys.env'),
-  ]
   const out: Record<string, string> = {}
-  for (const filePath of candidates) {
-    if (!fs.existsSync(filePath)) continue
-    const text = fs.readFileSync(filePath, 'utf8')
+  const keysEnvRepo = path.join(process.cwd(), '..', 'clearnote.keys.env')
+  const keysEnvApp = path.join(process.cwd(), 'clearnote.keys.env')
+  for (const filePath of [keysEnvRepo, keysEnvApp]) {
+    if (!fs.existsSync(/* turbopackIgnore: true */ filePath)) continue
+    const text = fs.readFileSync(/* turbopackIgnore: true */ filePath, 'utf8')
     for (const line of text.split('\n')) {
       const trimmed = line.trim()
       if (!trimmed || trimmed.startsWith('#')) continue

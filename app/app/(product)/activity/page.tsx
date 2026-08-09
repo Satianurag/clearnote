@@ -1,13 +1,29 @@
+'use client'
+
+import { Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { ActivityFeed } from '@/components/ActivityFeed'
 
-export default function ActivityPage() {
+function ActivityContent() {
+  const params = useSearchParams()
+  const wallet = params.get('wallet')?.trim() ?? undefined
+
   return (
     <div>
       <h2>Indexed activity</h2>
       <p className="muted">
-        CLNOTE02 Transfer events indexed by Envio. Replaces broken Cleanverse query_txs for demo.
+        ERC20 transfer history from the Envio indexer — defaults to <strong>CLINV01</strong> (product
+        token). CLNOTE02 is history-only; switch token filter to view it.
       </p>
-      <ActivityFeed />
+      <ActivityFeed initialWallet={wallet} initialOnlyMine={Boolean(wallet)} />
     </div>
+  )
+}
+
+export default function ActivityPage() {
+  return (
+    <Suspense fallback={<p className="muted">Loading activity…</p>}>
+      <ActivityContent />
+    </Suspense>
   )
 }

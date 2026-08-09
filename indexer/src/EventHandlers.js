@@ -65,6 +65,28 @@ InvoiceRegistry.InvoiceFinanced.handler(async ({ event, context }) => {
   });
 });
 
+InvoiceRegistry.InvoiceSettled.handler(async ({ event, context }) => {
+  context.InvoiceSettled.set({
+    id: eventId(event),
+    invoiceId: event.params.invoiceId,
+  });
+});
+
+InvoiceRegistry.InvoiceDefaulted.handler(async ({ event, context }) => {
+  context.InvoiceDefaulted.set({
+    id: eventId(event),
+    invoiceId: event.params.invoiceId,
+  });
+});
+
+InvoiceRegistry.DisputeRaised.handler(async ({ event, context }) => {
+  context.DisputeRaised.set({
+    id: eventId(event),
+    invoiceId: event.params.invoiceId,
+    evidenceHash: event.params.evidenceHash,
+  });
+});
+
 ClearNoteController.NoteIssued.handler(async ({ event, context }) => {
   context.NoteIssued.set({
     id: eventId(event),

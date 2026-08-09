@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useAccount } from 'wagmi'
 import { NeoButton } from '@/components/neo/NeoButton'
 import { NeoCard } from '@/components/neo/NeoCard'
+import { useErrorToast } from '@/hooks/useErrorToast'
 
 type ApassData = {
   tier?: string
@@ -37,15 +38,22 @@ function formatExpiry(unix?: number): string {
   })
 }
 
-export function ApassGenerate() {
+type ApassGenerateProps = {
+  required?: boolean
+  onStatusChange?: (hasPass: boolean) => void
+}
+
+export function ApassGenerate({ required, onStatusChange }: ApassGenerateProps = {}) {
   const { address } = useAccount()
-  const [fullName, setFullName] = useState('ClearNote Demo User')
+  const [fullName, setFullName] = useState('')
   const [country, setCountry] = useState('SG')
   const [existing, setExisting] = useState<LookupResult | null>(null)
   const [result, setResult] = useState<GenerateResult | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [checking, setChecking] = useState(false)
+
+  useErrorToast(error)
 
   const checkExisting = useCallback(async () => {
     if (!address) return
@@ -74,6 +82,10 @@ export function ApassGenerate() {
 
   async function generate() {
     if (!address) return
+    if (!fullName.trim()) {
+      setError('Enter your legal name for A-Pass issuance.')
+      return
+    }
     setLoading(true)
     setError(null)
     setResult(null)
@@ -114,11 +126,19 @@ export function ApassGenerate() {
 
   const hasPass = Boolean(existing?.ok && existing.data)
 
+  useEffect(() => {
+    onStatusChange?.(hasPass)
+  }, [hasPass, onStatusChange])
+
   return (
-    <NeoCard>
-      <h3 style={{ marginTop: 0 }}>A-Pass (Cleanverse)</h3>
-      <p className="neo-muted" style={{ fontSize: 14 }}>
-        Compliance onboarding uses an existing or new A-Pass on Monad sandbox — keys stay server-side.
+    <NeoCard className="apass-generate">
+      <h3 className="apass-generate__title">
+        A-Pass (Cleanverse){required ? ' — required' : ''}
+      </h3>
+      <p className="neo-muted neo-text-md">
+        {required
+          ? 'Investor and compliance flows need an active A-Pass before you can trade or run inspect demos.'
+          : 'Optional for exporters — generate or verify an existing A-Pass on Monad sandbox.'}
       </p>
 
       {!address ? (
@@ -132,10 +152,10 @@ export function ApassGenerate() {
           {checking && <p className="neo-muted">Checking existing A-Pass…</p>}
 
           {hasPass && existing?.data && (
-            <div className="ok" style={{ marginBottom: 16, fontSize: 14 }}>
+            <div className="ok apass-generate__ok">
               <strong>Already onboarded.</strong> This wallet has an active A-Pass — you do not need to
               generate again.
-              <ul style={{ margin: '8px 0 0', paddingLeft: 20 }}>
+              <ul className="neo-list-disc">
                 <li>Record: {existing.data.cvRecordId ?? '—'}</li>
                 <li>Tier: {existing.data.tier ?? '—'}</li>
                 <li>Countries: {(existing.data.countries ?? []).join(', ') || '—'}</li>
@@ -146,24 +166,24 @@ export function ApassGenerate() {
           )}
 
           {!hasPass && !checking && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxWidth: 400 }}>
-              <label>
+            <div className="neo-stack-sm">
+              <label className="neo-field-label">
                 Full name
                 <input
                   type="text"
+                  className="neo-input"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  style={{ display: 'block', width: '100%', padding: 8, marginTop: 4 }}
                 />
               </label>
-              <label>
+              <label className="neo-field-label">
                 Country (ISO-2)
                 <input
                   type="text"
+                  className="neo-input"
                   value={country}
                   maxLength={2}
                   onChange={(e) => setCountry(e.target.value.toUpperCase())}
-                  style={{ display: 'block', width: '100%', padding: 8, marginTop: 4 }}
                 />
               </label>
               <NeoButton disabled={loading} onClick={generate}>
@@ -180,9 +200,8 @@ export function ApassGenerate() {
         </>
       )}
 
-      {error && <p className="error" style={{ marginTop: 12 }}>{error}</p>}
       {result && (
-        <pre className="code-block" style={{ marginTop: 12, fontSize: 12 }}>
+        <pre className="code-block code-block--sm">
           {JSON.stringify(result, null, 2)}
         </pre>
       )}
