@@ -38,8 +38,19 @@ if [ "${1:-start}" = "setup" ]; then
   exit $?
 fi
 
-if [ "${RUN_DB_SETUP:-false}" = "true" ]; then
+# Render free tier skips preDeploy — answer /healthz while db-setup runs.
+if [ "${RUN_DB_SETUP:-true}" = "true" ]; then
+  node -e "
+    const http = require('http');
+    const port = Number(process.env.PORT || 10000);
+    http.createServer((_, res) => { res.writeHead(200); res.end('OK'); })
+      .listen(port, '0.0.0.0');
+  " &
+  HEALTH_PID=$!
+  trap 'kill "$HEALTH_PID" 2>/dev/null || true' EXIT
   pnpm db-setup
+  kill "$HEALTH_PID" 2>/dev/null || true
+  trap - EXIT
 fi
 
 exec pnpm start
