@@ -26,7 +26,7 @@ const envVars = [
   { key: 'HASURA_GRAPHQL_ENDPOINT', value: 'https://clearnote-hasura.onrender.com/v1/metadata' },
   { key: 'TUI_OFF', value: 'true' },
   { key: 'LOG_LEVEL', value: 'info' },
-  { key: 'RUN_DB_SETUP', value: 'true' },
+  { key: 'RUN_DB_SETUP', value: 'false' },
 ]
 
 await api('/services/srv-d9sn7vafngtc73fm0rvg', {

@@ -62,4 +62,4 @@ services:
       - key: LOG_LEVEL
         value: info
       - key: RUN_DB_SETUP
-        value: "true"
+        value: "false"
