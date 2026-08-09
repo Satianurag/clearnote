@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createPublicClient, encodeFunctionData, getAddress, http, isAddress, type Hex } from 'viem'
 import { clientIp, guardRateLimit } from '@/lib/api-guard'
+import { guardApiPersona } from '@/lib/api-persona'
 import { addresses, rpcUrl } from '@/lib/config'
 import { clearNoteControllerAbi, invoiceRegistryAbi } from '@/lib/contracts'
 import { rateLimit } from '@/lib/rate-limit'
@@ -16,6 +17,9 @@ const DEFAULT_UNITS = BigInt('1000000000000000000') // 1e18 — matches seed scr
 export async function POST(request: NextRequest) {
   const blocked = guardRateLimit(request, 'safe/issue-note', { limit: 20, windowMs: 60_000 })
   if (blocked) return blocked
+
+  const personaBlocked = guardApiPersona(request, { mode: 'roles', roles: ['exporter'] })
+  if (personaBlocked) return personaBlocked
 
   if (!getSafeSignerKeys()) {
     return NextResponse.json(

@@ -2,9 +2,9 @@
 
 import { Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
-import Link from 'next/link'
 import { ExporterUpload } from '@/components/ExporterUpload'
 import { OriginatorPortfolio } from '@/components/OriginatorPortfolio'
+import { ProductLinks } from '@/components/ProductLinks'
 import { WalletGate } from '@/components/WalletGate'
 
 function ExporterContent() {
@@ -20,9 +20,12 @@ function ExporterContent() {
         <div className="product-page">
           <h1 className="product-title">Originator — portfolio</h1>
           <OriginatorPortfolio />
-          <p className="product-links">
-            <Link href="/exporter">Exporter upload</Link> · <Link href="/compliance/matrix">Compliance</Link>
-          </p>
+          <ProductLinks
+            items={[
+              { href: '/exporter', label: 'Exporter upload' },
+              { href: '/obligor', label: 'Obligor accept' },
+            ]}
+          />
         </div>
       </WalletGate>
     )
@@ -40,10 +43,12 @@ function ExporterContent() {
           wallet.
         </p>
         <ExporterUpload />
-        <p className="product-links">
-          <Link href="/exporter?tab=originator">Originator portfolio</Link> ·{' '}
-          <Link href="/compliance/matrix">Compliance matrix</Link> · <Link href="/investor">Investor desk</Link>
-        </p>
+        <ProductLinks
+          items={[
+            { href: '/exporter?tab=originator', label: 'Originator portfolio' },
+            { href: '/obligor', label: 'Obligor accept' },
+          ]}
+        />
       </div>
     </WalletGate>
   )

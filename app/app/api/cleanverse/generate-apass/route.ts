@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAddress, isAddress } from 'viem'
 import { guardRateLimit } from '@/lib/api-guard'
+import { guardApiPersona } from '@/lib/api-persona'
 import { cvRequest } from '@/lib/cleanverse'
 import { getServerSecret } from '@/lib/server-keys'
 
@@ -17,6 +18,9 @@ function getCleanverseConfig() {
 export async function POST(request: NextRequest) {
   const blocked = guardRateLimit(request, 'cleanverse/generate-apass', { limit: 10, windowMs: 60_000 })
   if (blocked) return blocked
+
+  const personaBlocked = guardApiPersona(request, { mode: 'any' })
+  if (personaBlocked) return personaBlocked
 
   const config = getCleanverseConfig()
   if (!config) {

@@ -175,7 +175,7 @@ function PortfolioRow({
               {busy ? 'Sign SIWE & Safe…' : 'Finance (issueNote)'}
             </NeoButton>
           )}
-          {isFinanced && <Link href="/investor">Trade on DvP →</Link>}
+          {isFinanced && <span className="neo-muted">Financed — secondary DvP is on the investor desk.</span>}
           {status === 1 && (
             <Link href={`/obligor?invoice=${invoice.invoiceId}`}>Await obligor →</Link>
           )}

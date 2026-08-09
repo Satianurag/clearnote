@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { guardRateLimit } from '@/lib/api-guard'
+import { guardApiPersona } from '@/lib/api-persona'
 import { cvRequest, getCleanverseConfig } from '@/lib/cleanverse'
 
 export const dynamic = 'force-dynamic'
@@ -9,6 +10,9 @@ const ADDRESS_RE = /^0x[a-fA-F0-9]{40}$/
 export async function POST(request: NextRequest) {
   const blocked = guardRateLimit(request, 'cleanverse/apass', { limit: 40, windowMs: 60_000 })
   if (blocked) return blocked
+
+  const personaBlocked = guardApiPersona(request, { mode: 'any' })
+  if (personaBlocked) return personaBlocked
 
   const config = getCleanverseConfig()
   if (!config) {

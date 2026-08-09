@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isAddress } from 'viem'
 import { guardRateLimit } from '@/lib/api-guard'
+import { guardApiPersona } from '@/lib/api-persona'
 import { generateIvms101, ivms101Hash, THRESHOLD_SGD, THRESHOLD_USD } from '@/lib/ivms'
 
 export const dynamic = 'force-dynamic'
@@ -19,6 +20,9 @@ type Body = {
 export async function POST(request: NextRequest) {
   const blocked = guardRateLimit(request, 'ivms/generate', { limit: 20, windowMs: 60_000 })
   if (blocked) return blocked
+
+  const personaBlocked = guardApiPersona(request, { mode: 'roles', roles: ['exporter', 'compliance'] })
+  if (personaBlocked) return personaBlocked
 
   let body: Body
   try {

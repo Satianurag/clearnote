@@ -1,6 +1,5 @@
 'use client'
 
-import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { useAccount, useReadContract } from 'wagmi'
 import { getAddress, parseUnits } from 'viem'
@@ -8,6 +7,7 @@ import { formatTokenAmount } from '@/lib/format'
 import { DvPOfferBook } from '@/components/DvPOfferBook'
 import { DvPPostOffer } from '@/components/DvPPostOffer'
 import { InvestorPositions } from '@/components/InvestorPositions'
+import { ProductLinks } from '@/components/ProductLinks'
 import { NeoCard } from '@/components/neo/NeoCard'
 import { WalletGate } from '@/components/WalletGate'
 import { addresses, demoWallets, explorerUrl } from '@/lib/config'
@@ -349,10 +349,13 @@ function InvestorDesk({ buyer }: { buyer: `0x${string}` }) {
       <DvPPostOffer onPosted={() => setOfferRefresh((k) => k + 1)} />
       <DvPOfferBook refreshKey={offerRefresh} />
 
+      <ProductLinks
+        items={[
+          { href: '/debug/transfers', label: 'Transfer demo' },
+          { href: '/debug/minidvp', label: 'MiniDvP' },
+        ]}
+      />
       <p className="product-links">
-        <Link href="/debug/transfers">Transfer demo</Link> ·{' '}
-        <Link href="/compliance/matrix">Compliance matrix</Link> ·{' '}
-        <Link href="/debug/minidvp">MiniDvP</Link> ·{' '}
         <a href={`${explorerUrl}/address/${addresses.dvpEscrow}`}>DvP on Monadscan</a>
       </p>
     </div>

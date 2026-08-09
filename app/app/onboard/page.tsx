@@ -7,7 +7,8 @@ import { ApassGenerate } from '@/components/ApassGenerate'
 import { NeoButton } from '@/components/neo/NeoButton'
 import { useWalletSession } from '@/hooks/useWalletSession'
 import { PERSONAS, personaById, type PersonaId } from '@/lib/personas'
-import { setStoredPersona } from '@/lib/persona-session'
+import { setStoredPersona, clearStoredPersona, getStoredPersona } from '@/lib/persona-session'
+import { canAccessRoute, personaHomePath } from '@/lib/persona-routes'
 
 const PERSONA_VISUAL: Record<PersonaId, { num: string; glyph: string }> = {
   exporter: { num: '01', glyph: 'EX' },
@@ -32,6 +33,18 @@ function OnboardContent() {
     if (persona) setSelected(persona.id)
   }, [searchParams])
 
+  useEffect(() => {
+    const switching = searchParams.get('switch') === '1'
+    if (switching) {
+      clearStoredPersona()
+      return
+    }
+    const existing = getStoredPersona()
+    if (existing) {
+      router.replace(personaHomePath(existing))
+    }
+  }, [searchParams, router])
+
   const active = personaById(selected)
   const apassRequired = active?.id === 'investor' || active?.id === 'compliance'
   const canLaunch = Boolean(active && isReady && (!apassRequired || hasApass))
@@ -42,12 +55,27 @@ function OnboardContent() {
     setSelected(id)
     setHasApass(false)
     setStoredPersona(id)
-    router.replace(`/onboard?role=${id}`, { scroll: false })
+    const next = searchParams.get('next')
+    const qs = new URLSearchParams({ role: id })
+    if (next) qs.set('next', next)
+    router.replace(`/onboard?${qs.toString()}`, { scroll: false })
   }
 
   function continueToApp() {
     if (!active || !canLaunch) return
     setStoredPersona(active.id)
+    const next = searchParams.get('next')?.trim()
+    if (next && next.startsWith('/') && !next.startsWith('//')) {
+      try {
+        const url = new URL(next, 'http://clearnote.local')
+        if (canAccessRoute(active.id, url.pathname, url.searchParams.get('tab'))) {
+          router.push(`${url.pathname}${url.search}`)
+          return
+        }
+      } catch {
+        // ignore malformed next
+      }
+    }
     router.push(active.href)
   }
 

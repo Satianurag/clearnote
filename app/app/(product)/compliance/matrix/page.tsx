@@ -1,9 +1,9 @@
 'use client'
 
-import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
 import { getAddress } from 'viem'
 import { WalletComplianceCheck } from '@/components/WalletComplianceCheck'
+import { ProductLinks } from '@/components/ProductLinks'
 import { NeoCard } from '@/components/neo/NeoCard'
 import {
   COMPLIANCE_REF_WALLETS,
@@ -156,11 +156,13 @@ export default function ComplianceMatrixPage() {
         </table>
       </NeoCard>
 
-      <p className="product-links">
-        <Link href="/compliance?tab=regulator">OFAC verifyInclusion</Link> ·{' '}
-        <Link href="/activity">Indexed activity</Link> ·{' '}
-        <Link href="/exporter">Exporter</Link> · <Link href="/investor">Investor / DvP</Link>
-      </p>
+      <ProductLinks
+        items={[
+          { href: '/compliance?tab=regulator', label: 'OFAC verifyInclusion' },
+          { href: '/activity', label: 'Indexed activity' },
+          { href: '/compliance', label: 'A-Pass lookup' },
+        ]}
+      />
     </div>
   )
 }

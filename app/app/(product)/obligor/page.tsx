@@ -1,5 +1,5 @@
-import Link from 'next/link'
 import { ObligorAccept } from '@/components/ObligorAccept'
+import { ProductLinks } from '@/components/ProductLinks'
 import { WalletGate } from '@/components/WalletGate'
 
 export default function ObligorPage() {
@@ -18,11 +18,12 @@ export default function ObligorPage() {
           </p>
         </header>
         <ObligorAccept />
-        <p className="product-links">
-          <Link href="/exporter">Exporter upload</Link> ·{' '}
-          <Link href="/exporter?tab=originator">Originator portfolio</Link> ·{' '}
-          <Link href="/investor">Investor desk</Link>
-        </p>
+        <ProductLinks
+          items={[
+            { href: '/exporter', label: 'Exporter upload' },
+            { href: '/exporter?tab=originator', label: 'Originator portfolio' },
+          ]}
+        />
       </div>
     </WalletGate>
   )

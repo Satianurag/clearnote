@@ -2,6 +2,7 @@
 
 import { LandingHeader } from '@/components/LandingHeader'
 import { Nav } from '@/components/Nav'
+import { PersonaGate } from '@/components/PersonaGate'
 
 export function ProductShell({ children }: { children: React.ReactNode }) {
   return (
@@ -11,7 +12,9 @@ export function ProductShell({ children }: { children: React.ReactNode }) {
         <div className="product-shell__nav">
           <Nav />
         </div>
-        <main className="product-main">{children}</main>
+        <main className="product-main">
+          <PersonaGate>{children}</PersonaGate>
+        </main>
       </div>
     </div>
   )

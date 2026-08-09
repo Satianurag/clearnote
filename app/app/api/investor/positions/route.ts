@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createPublicClient, getAddress, http, isAddress, type Hex } from 'viem'
 import { guardRateLimit } from '@/lib/api-guard'
+import { guardApiPersona } from '@/lib/api-persona'
 import { addresses, rpcUrl } from '@/lib/config'
 import { invoiceRegistryAbi } from '@/lib/contracts'
 import { INVOICE_STATUS, decodeBytes3Currency, type InvoiceStatusCode } from '@/lib/invoice-acceptance'
@@ -14,6 +15,9 @@ const client = createPublicClient({ chain: monadTestnet, transport: http(rpcUrl)
 export async function GET(request: NextRequest) {
   const blocked = guardRateLimit(request, 'investor/positions', { limit: 40, windowMs: 60_000 })
   if (blocked) return blocked
+
+  const personaBlocked = guardApiPersona(request, { mode: 'roles', roles: ['investor'] })
+  if (personaBlocked) return personaBlocked
 
   const holder = request.nextUrl.searchParams.get('holder')?.trim()
   if (!holder || !isAddress(holder)) {

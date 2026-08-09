@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { type Hex } from 'viem'
+import { guardApiPersona } from '@/lib/api-persona'
 import { readRegistryInvoice } from '@/lib/registry'
 import { INVOICE_STATUS, type InvoiceStatusCode } from '@/lib/invoice-acceptance'
 
@@ -8,6 +9,9 @@ export const dynamic = 'force-dynamic'
 const BYTES32_RE = /^0x[a-fA-F0-9]{64}$/
 
 export async function GET(request: NextRequest) {
+  const personaBlocked = guardApiPersona(request, { mode: 'roles', roles: ['exporter'] })
+  if (personaBlocked) return personaBlocked
+
   const invoiceId = request.nextUrl.searchParams.get('invoiceId')?.trim()
   if (!invoiceId || !BYTES32_RE.test(invoiceId)) {
     return NextResponse.json({ error: 'valid invoiceId (bytes32) required' }, { status: 400 })
@@ -33,6 +37,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const personaBlocked = guardApiPersona(request, { mode: 'roles', roles: ['exporter'] })
+  if (personaBlocked) return personaBlocked
+
   let body: { invoiceIds?: string[] }
   try {
     body = await request.json()

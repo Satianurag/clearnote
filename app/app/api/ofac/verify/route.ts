@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createPublicClient, getAddress, http, isAddress } from 'viem'
 import { guardRateLimit } from '@/lib/api-guard'
+import { guardApiPersona } from '@/lib/api-persona'
 import { addresses, rpcUrl } from '@/lib/config'
 import { sanctionsRegistryAbi } from '@/lib/contracts'
 import { addressInOfacList, ofacRootMeta, proofForAddress } from '@/lib/ofac'
@@ -14,6 +15,9 @@ const client = createPublicClient({ chain: monadTestnet, transport: http(rpcUrl)
 export async function POST(request: NextRequest) {
   const blocked = guardRateLimit(request, 'ofac/verify', { limit: 30, windowMs: 60_000 })
   if (blocked) return blocked
+
+  const personaBlocked = guardApiPersona(request, { mode: 'roles', roles: ['compliance'] })
+  if (personaBlocked) return personaBlocked
 
   const body = (await request.json().catch(() => ({}))) as { address?: string }
   const raw = body.address?.trim()

@@ -1,12 +1,18 @@
 'use client'
 
 import Link from 'next/link'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { DashboardInvestorSummary } from '@/components/DashboardInvestorSummary'
 import { DashboardRecentActivity } from '@/components/DashboardRecentActivity'
 import { NeoCard } from '@/components/neo/NeoCard'
 import { useWalletSession } from '@/hooks/useWalletSession'
 import { getStoredPersona } from '@/lib/persona-session'
+import type { PersonaId } from '@/lib/personas'
+import {
+  pendingActionAllowedForPersona,
+  quickLinksForPersona,
+  showDeveloperToolsForPersona,
+} from '@/lib/persona-routes'
 import { shortHash } from '@/lib/invoice-acceptance'
 import { useErrorToast } from '@/hooks/useErrorToast'
 import type { Hex } from 'viem'
@@ -20,23 +26,25 @@ type PendingAction = {
   label: string
 }
 
-type PendingSummary = {
-  awaitObligor: number
-  canFinance: number
-  canSettle: number
-  obligorAccept: number
-  total: number
-}
-
 export function DashboardHome() {
   const { address, isReady } = useWalletSession()
-  const persona = typeof window !== 'undefined' ? getStoredPersona() : null
+  const [persona, setPersona] = useState<PersonaId | null>(null)
   const [actions, setActions] = useState<PendingAction[]>([])
-  const [summary, setSummary] = useState<PendingSummary | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useErrorToast(error)
+
+  useEffect(() => {
+    setPersona(getStoredPersona())
+    const sync = () => setPersona(getStoredPersona())
+    window.addEventListener('storage', sync)
+    window.addEventListener('clearnote-persona', sync)
+    return () => {
+      window.removeEventListener('storage', sync)
+      window.removeEventListener('clearnote-persona', sync)
+    }
+  }, [])
 
   const load = useCallback(async () => {
     if (!address) return
@@ -46,13 +54,11 @@ export function DashboardHome() {
       const res = await fetch(`/api/dashboard/pending?address=${encodeURIComponent(address)}`)
       const json = (await res.json()) as {
         actions?: PendingAction[]
-        summary?: PendingSummary
         error?: string
         indexerErrors?: string[]
       }
       if (!res.ok) throw new Error(json.error ?? `HTTP ${res.status}`)
       setActions(json.actions ?? [])
-      setSummary(json.summary ?? null)
       if (json.indexerErrors?.length) {
         setError(`Indexer partial: ${json.indexerErrors.join(' · ')}`)
       }
@@ -70,8 +76,41 @@ export function DashboardHome() {
   const personaLabel =
     persona === 'exporter' ? 'Exporter' : persona === 'investor' ? 'Investor' : persona === 'compliance' ? 'Compliance' : null
 
-  const obligorActions = actions.filter((a) => a.type === 'obligor_accept')
-  const otherActions = actions.filter((a) => a.type !== 'obligor_accept')
+  const visibleActions = useMemo(() => {
+    if (!persona) return []
+    return actions.filter((a) => pendingActionAllowedForPersona(persona, a.type))
+  }, [actions, persona])
+
+  const visibleSummary = useMemo(() => {
+    if (!persona || visibleActions.length === 0) {
+      return {
+        awaitObligor: 0,
+        canFinance: 0,
+        canSettle: 0,
+        obligorAccept: 0,
+        total: 0,
+      }
+    }
+    let awaitObligor = 0
+    let canFinance = 0
+    let canSettle = 0
+    let obligorAccept = 0
+    for (const a of visibleActions) {
+      if (a.type === 'await_obligor') awaitObligor++
+      if (a.type === 'finance') canFinance++
+      if (a.type === 'settle') canSettle++
+      if (a.type === 'obligor_accept') obligorAccept++
+    }
+    return { awaitObligor, canFinance, canSettle, obligorAccept, total: visibleActions.length }
+  }, [persona, visibleActions])
+
+  const quickLinks = useMemo(
+    () => (persona ? quickLinksForPersona(persona, address) : []),
+    [persona, address],
+  )
+
+  const obligorActions = visibleActions.filter((a) => a.type === 'obligor_accept')
+  const otherActions = visibleActions.filter((a) => a.type !== 'obligor_accept')
 
   return (
     <div className="dashboard-home">
@@ -82,7 +121,7 @@ export function DashboardHome() {
           : 'Pick a role during onboarding to filter navigation, or connect a wallet for pending actions.'}
       </p>
 
-      {isReady && address && (
+      {isReady && address && persona && visibleActions.length > 0 && (
         <div className="dashboard-home__section">
           <NeoCard className="dashboard-pending">
           <div className="dashboard-pending__head">
@@ -91,13 +130,13 @@ export function DashboardHome() {
               {loading ? 'Refreshing…' : 'Refresh'}
             </button>
           </div>
-          {summary && (
+          {visibleSummary && (
             <p className="neo-muted dashboard-pending__summary">
-              {summary.obligorAccept > 0 && <span>{summary.obligorAccept} to accept · </span>}
-              {summary.canFinance > 0 && <span>{summary.canFinance} ready to finance · </span>}
-              {summary.canSettle > 0 && <span>{summary.canSettle} ready to settle · </span>}
-              {summary.awaitObligor > 0 && <span>{summary.awaitObligor} awaiting obligor</span>}
-              {summary.total === 0 && 'No pending items — you are caught up.'}
+              {visibleSummary.obligorAccept > 0 && <span>{visibleSummary.obligorAccept} to accept · </span>}
+              {visibleSummary.canFinance > 0 && <span>{visibleSummary.canFinance} ready to finance · </span>}
+              {visibleSummary.canSettle > 0 && <span>{visibleSummary.canSettle} ready to settle · </span>}
+              {visibleSummary.awaitObligor > 0 && <span>{visibleSummary.awaitObligor} awaiting obligor</span>}
+              {visibleSummary.total === 0 && 'No pending items — you are caught up.'}
             </p>
           )}
           {obligorActions.length > 0 && (
@@ -135,13 +174,13 @@ export function DashboardHome() {
         </div>
       )}
 
-      {isReady && address && (
+      {isReady && address && persona === 'investor' && (
         <div className="dashboard-home__section">
           <DashboardInvestorSummary holder={address} />
         </div>
       )}
 
-      {isReady && address && (
+      {isReady && address && persona === 'compliance' && (
         <div className="dashboard-home__section">
           <DashboardRecentActivity address={address} />
         </div>
@@ -156,42 +195,31 @@ export function DashboardHome() {
         </div>
       )}
 
-      <div className="grid grid-2 dashboard-home__section">
-        <div className="card">
-          <h3>Exporter</h3>
-          <p className="muted">Register PINT-SG invoices, obligor handoff, originator portfolio.</p>
-          <Link href="/exporter">Open exporter →</Link>
+      {quickLinks.length > 0 && (
+        <div className="grid grid-2 dashboard-home__section">
+          {quickLinks.map((link) => (
+            <div key={link.href} className="card">
+              <h3>{link.title}</h3>
+              <p className="muted">{link.description}</p>
+              <Link href={link.href}>Open →</Link>
+            </div>
+          ))}
         </div>
-        <div className="card">
-          <h3>Investor</h3>
-          <p className="muted">Positions, DvP offer book, Cleanverse pre-flight.</p>
-          <Link href="/investor">Open investor →</Link>
-        </div>
-        <div className="card">
-          <h3>Indexed activity</h3>
-          <p className="muted">ERC20 transfers (CLNOTE02, CLINV01, CLLAT01) via Envio.</p>
-          <Link href={address ? `/activity?wallet=${address}` : '/activity'}>
-            View activity →
-          </Link>
-        </div>
-        <div className="card">
-          <h3>Compliance matrix</h3>
-          <p className="muted">Live inspect() reason codes — Cleanverse vs ClearNote.</p>
-          <Link href="/compliance/matrix">Open matrix →</Link>
-        </div>
-      </div>
+      )}
 
-      <details className="card dashboard-home__section dashboard-home__details">
-        <summary>Developer tools</summary>
-        <ul className="muted dashboard-home__details-list">
-          <li>
-            <Link href="/debug/transfers">Wallet transfer test</Link> — CLLAT01 pre-flight demo
-          </li>
-          <li>
-            <Link href="/debug/minidvp">MiniDvP</Link> — atomic note + aUSDC settlement
-          </li>
-        </ul>
-      </details>
+      {persona && showDeveloperToolsForPersona(persona) && (
+        <details className="card dashboard-home__section dashboard-home__details">
+          <summary>Developer tools</summary>
+          <ul className="muted dashboard-home__details-list">
+            <li>
+              <Link href="/debug/transfers">Wallet transfer test</Link> — CLLAT01 pre-flight demo
+            </li>
+            <li>
+              <Link href="/debug/minidvp">MiniDvP</Link> — atomic note + aUSDC settlement
+            </li>
+          </ul>
+        </details>
+      )}
 
       <details className="card dashboard-home__section dashboard-home__details">
         <summary>Deployed contracts</summary>

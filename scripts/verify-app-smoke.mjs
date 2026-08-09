@@ -15,8 +15,13 @@ const SDN = '0x098b716b8aaf21512996dc57eb0615e2383e2f96'
 
 const checks = []
 
-async function get(path, opts) {
-  const res = await fetch(`${BASE}${path}`, { ...opts, signal: AbortSignal.timeout(120_000) })
+function personaCookie(persona) {
+  return `clearnote-persona=${persona}`
+}
+
+async function get(path, opts = {}) {
+  const headers = { ...(opts.headers ?? {}) }
+  const res = await fetch(`${BASE}${path}`, { ...opts, headers, signal: AbortSignal.timeout(120_000) })
   const text = await res.text()
   let json
   try {
@@ -52,7 +57,9 @@ async function main() {
   }
 
   try {
-    const { res, json } = await get('/api/audit/pack/list')
+    const { res, json } = await get('/api/audit/pack/list', {
+      headers: { Cookie: personaCookie('compliance') },
+    })
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     if (!Array.isArray(json.packs) || json.packs.length < 10) throw new Error(`expected >=10 packs, got ${json.packs?.length}`)
     const inv001 = json.meta?.find((m) => m.id === 'INV-001')
@@ -64,6 +71,7 @@ async function main() {
 
   try {
     const res = await fetch(`${BASE}/api/audit/pack?id=INV-001&format=zip`, {
+      headers: { Cookie: personaCookie('compliance') },
       signal: AbortSignal.timeout(60_000),
     })
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
@@ -77,7 +85,9 @@ async function main() {
   }
 
   try {
-    const { res } = await get('/api/audit/pack?id=INV-011')
+    const { res } = await get('/api/audit/pack?id=INV-011', {
+      headers: { Cookie: personaCookie('compliance') },
+    })
     if (res.status !== 404) throw new Error(`expected 404 for skipped invoice, got ${res.status}`)
     pass('audit pack INV-011 returns 404 (skipped_register)')
   } catch (e) {
@@ -85,7 +95,9 @@ async function main() {
   }
 
   try {
-    const { res, json } = await get('/api/audit/pack?id=INV-002')
+    const { res, json } = await get('/api/audit/pack?id=INV-002', {
+      headers: { Cookie: personaCookie('compliance') },
+    })
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     if (!json.invoiceId) throw new Error('missing invoiceId')
     pass('audit pack INV-002 on disk')
@@ -94,7 +106,9 @@ async function main() {
   }
 
   try {
-    const { res, json } = await get('/api/indexer?op=compliance&limit=5')
+    const { res, json } = await get('/api/indexer?op=compliance&limit=5', {
+      headers: { Cookie: personaCookie('compliance') },
+    })
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     if (!Array.isArray(json.events)) throw new Error('missing events array')
     pass('indexer compliance events')
@@ -103,7 +117,9 @@ async function main() {
   }
 
   try {
-    const { res, json } = await get(`/api/dashboard/pending?address=${WALLET_A}`)
+    const { res, json } = await get(`/api/dashboard/pending?address=${WALLET_A}`, {
+      headers: { Cookie: personaCookie('exporter') },
+    })
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     if (!json.summary || !Array.isArray(json.actions)) throw new Error('invalid shape')
     pass('dashboard pending (wallet A)')
@@ -112,7 +128,9 @@ async function main() {
   }
 
   try {
-    const { res, json } = await get(`/api/investor/positions?holder=${WALLET_B}`)
+    const { res, json } = await get(`/api/investor/positions?holder=${WALLET_B}`, {
+      headers: { Cookie: personaCookie('investor') },
+    })
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     if (!Array.isArray(json.positions)) throw new Error('missing positions')
     pass('investor positions (wallet B)')
@@ -123,7 +141,10 @@ async function main() {
   try {
     const { res, json } = await get('/api/cleanverse/generate-apass', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Cookie: personaCookie('investor'),
+      },
       body: JSON.stringify({ address: WALLET_B }),
     })
     if (res.status !== 400) throw new Error(`expected 400 without fullName, got ${res.status}`)
@@ -136,7 +157,10 @@ async function main() {
   try {
     const { res, json } = await get('/api/ofac/verify', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Cookie: personaCookie('compliance'),
+      },
       body: JSON.stringify({ address: SDN }),
     })
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
@@ -147,7 +171,9 @@ async function main() {
   }
 
   try {
-    const { res, json } = await get('/api/audit/anchor')
+    const { res, json } = await get('/api/audit/anchor', {
+      headers: { Cookie: personaCookie('compliance') },
+    })
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     if (!Array.isArray(json.anchors)) throw new Error('missing anchors array')
     if (!Array.isArray(json.packs)) throw new Error('missing packs array')
@@ -159,7 +185,10 @@ async function main() {
   try {
     const { res, json } = await get('/api/ivms/generate', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Cookie: personaCookie('compliance'),
+      },
       body: JSON.stringify({
         originatorName: 'Demo Exporter',
         beneficiaryName: 'Wei Lin',
@@ -180,7 +209,10 @@ async function main() {
     const xml = readFileSync(resolve(root, 'seed/invoices/INV-001.xml'), 'utf8')
     const { res, json } = await get('/api/pint/validate', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Cookie: personaCookie('exporter'),
+      },
       body: JSON.stringify({ xml }),
     })
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
@@ -193,7 +225,9 @@ async function main() {
   }
 
   try {
-    const { res, json } = await get('/api/compliance/denials')
+    const { res, json } = await get('/api/compliance/denials', {
+      headers: { Cookie: personaCookie('compliance') },
+    })
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     if (!Array.isArray(json.denials)) throw new Error('missing denials array')
     if (json.denials.length < 1) throw new Error('expected at least one live denial scenario')
@@ -203,7 +237,9 @@ async function main() {
   }
 
   try {
-    const { res, json } = await get('/api/audit/denial-log')
+    const { res, json } = await get('/api/audit/denial-log', {
+      headers: { Cookie: personaCookie('compliance') },
+    })
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     if (!Array.isArray(json.entries)) throw new Error('missing entries array')
     if (json.entries.length < 1) throw new Error('expected archived denials from INV-001 pack')

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { guardRateLimit } from '@/lib/api-guard'
+import { guardApiPersona } from '@/lib/api-persona'
 import { runComplianceMatrixInspect } from '@/lib/compliance-inspect'
 import { addresses, demoWallets } from '@/lib/config'
 import { DEFAULT_INSPECT_UNITS } from '@/lib/inspect'
@@ -9,6 +10,9 @@ export const dynamic = 'force-dynamic'
 export async function GET(request: NextRequest) {
   const blocked = guardRateLimit(request, 'compliance/denials', { limit: 10, windowMs: 60_000 })
   if (blocked) return blocked
+
+  const personaBlocked = guardApiPersona(request, { mode: 'roles', roles: ['compliance'] })
+  if (personaBlocked) return personaBlocked
 
   const rows = await runComplianceMatrixInspect()
   const denials = rows

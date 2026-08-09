@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { Suspense, useEffect, useMemo, useState } from 'react'
 import type { PersonaId } from '@/lib/personas'
-import { getStoredPersona } from '@/lib/persona-session'
+import { clearStoredPersona, getStoredPersona } from '@/lib/persona-session'
 
 type NavLink = {
   href: string
@@ -37,7 +37,7 @@ const LINKS: NavLink[] = [
     href: '/compliance/matrix',
     label: 'Compliance matrix',
     match: 'exact',
-    personas: ['investor', 'compliance'],
+    personas: ['compliance'],
   },
   {
     href: '/compliance?tab=regulator',
@@ -48,7 +48,7 @@ const LINKS: NavLink[] = [
     personas: ['compliance'],
   },
   { href: '/compliance', label: 'A-Pass lookup', match: 'exact', personas: ['compliance'] },
-  { href: '/activity', label: 'Indexed activity', match: 'exact' },
+  { href: '/activity', label: 'Indexed activity', match: 'exact', personas: ['compliance'] },
 ]
 
 function isActive(link: NavLink, pathname: string, tab: string | null): boolean {
@@ -79,7 +79,9 @@ function NavLinks() {
   }, [pathname])
 
   const links = useMemo(() => {
-    if (!persona) return LINKS
+    if (!persona) {
+      return [{ href: '/onboard', label: 'Choose role', match: 'exact' as const }]
+    }
     return LINKS.filter((link) => !link.personas || link.personas.includes(persona))
   }, [persona])
 
@@ -98,6 +100,15 @@ function NavLinks() {
           </Link>
         )
       })}
+      {persona && (
+        <Link
+          href="/onboard?switch=1"
+          className="product-nav__link product-nav__link--switch"
+          onClick={() => clearStoredPersona()}
+        >
+          Switch role
+        </Link>
+      )}
     </nav>
   )
 }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { guardRateLimit } from '@/lib/api-guard'
+import { guardApiPersona } from '@/lib/api-persona'
 import { loadAuditPack, readAuditPackZip } from '@/lib/audit-pack'
 
 export const dynamic = 'force-dynamic'
@@ -7,6 +8,9 @@ export const dynamic = 'force-dynamic'
 export async function GET(request: NextRequest) {
   const blocked = guardRateLimit(request, 'audit/pack', { limit: 30, windowMs: 60_000 })
   if (blocked) return blocked
+
+  const personaBlocked = guardApiPersona(request, { mode: 'roles', roles: ['compliance'] })
+  if (personaBlocked) return personaBlocked
 
   const id =
     request.nextUrl.searchParams.get('id')?.trim() ||

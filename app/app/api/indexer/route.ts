@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isAddress } from 'viem'
+import { guardApiPersona, indexerOpPolicy } from '@/lib/api-persona'
 import {
   queryIndexer,
   queryIndexerCompliance,
@@ -14,6 +15,9 @@ const TOKEN_LABELS = new Set(['CLNOTE02', 'CLLAT01', 'CLINV01'])
 
 export async function GET(request: NextRequest) {
   const op = request.nextUrl.searchParams.get('op') ?? 'transfers'
+  const personaBlocked = guardApiPersona(request, indexerOpPolicy(op))
+  if (personaBlocked) return personaBlocked
+
   if (!ALLOWED_OPS.has(op)) {
     return NextResponse.json({ error: 'unknown operation' }, { status: 400 })
   }

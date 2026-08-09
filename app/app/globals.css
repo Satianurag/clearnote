@@ -586,6 +586,13 @@ a {
   box-shadow: 3px 3px 0 0 var(--neo-black);
 }
 
+.product-nav__link--switch {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 600;
+  opacity: 0.85;
+}
+
 .compliance-matrix__toolbar {
   display: flex;
   align-items: center;

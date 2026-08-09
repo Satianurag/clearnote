@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAddress, isAddress } from 'viem'
 import { guardRateLimit } from '@/lib/api-guard'
+import { guardApiPersona, getPersonaFromRequest } from '@/lib/api-persona'
 import { INVOICE_STATUS, type InvoiceStatusCode } from '@/lib/invoice-acceptance'
+import { pendingActionAllowedForPersona } from '@/lib/persona-routes'
 import { queryIndexerInvoices } from '@/lib/indexer'
 import { readRegistryInvoice } from '@/lib/registry'
 
@@ -20,6 +22,10 @@ export async function GET(request: NextRequest) {
   const blocked = guardRateLimit(request, 'dashboard/pending', { limit: 40, windowMs: 60_000 })
   if (blocked) return blocked
 
+  const personaBlocked = guardApiPersona(request, { mode: 'roles', roles: ['exporter', 'investor'] })
+  if (personaBlocked) return personaBlocked
+
+  const persona = getPersonaFromRequest(request)
   const address = request.nextUrl.searchParams.get('address')?.trim()
   if (!address || !isAddress(address)) {
     return NextResponse.json({ error: 'valid address required' }, { status: 400 })
@@ -37,10 +43,6 @@ export async function GET(request: NextRequest) {
   for (const inv of asObligor.invoices ?? []) invoiceIds.add(inv.invoiceId.toLowerCase())
 
   const actions: PendingAction[] = []
-  let awaitObligor = 0
-  let canFinance = 0
-  let canSettle = 0
-  let obligorAccept = 0
 
   for (const invoiceId of invoiceIds) {
     const inv = await readRegistryInvoice(invoiceId as `0x${string}`)
@@ -52,7 +54,6 @@ export async function GET(request: NextRequest) {
     const obligorMatch = inv.obligor.toLowerCase() === wallet
 
     if (originatorMatch && status === 1) {
-      awaitObligor++
       actions.push({
         type: 'await_obligor',
         invoiceId,
@@ -64,7 +65,6 @@ export async function GET(request: NextRequest) {
     }
 
     if (originatorMatch && status === 2) {
-      canFinance++
       actions.push({
         type: 'finance',
         invoiceId,
@@ -76,7 +76,6 @@ export async function GET(request: NextRequest) {
     }
 
     if (originatorMatch && status === 3) {
-      canSettle++
       actions.push({
         type: 'settle',
         invoiceId,
@@ -88,7 +87,6 @@ export async function GET(request: NextRequest) {
     }
 
     if (obligorMatch && status === 1) {
-      obligorAccept++
       actions.push({
         type: 'obligor_accept',
         invoiceId,
@@ -112,8 +110,14 @@ export async function GET(request: NextRequest) {
   }
 
   return NextResponse.json({
-    actions: actions.slice(0, 12),
-    summary: { awaitObligor, canFinance, canSettle, obligorAccept, total: actions.length },
+    actions: actions.filter((a) => persona && pendingActionAllowedForPersona(persona, a.type)).slice(0, 12),
+    summary: {
+      awaitObligor: persona ? actions.filter((a) => pendingActionAllowedForPersona(persona, a.type) && a.type === 'await_obligor').length : 0,
+      canFinance: persona ? actions.filter((a) => pendingActionAllowedForPersona(persona, a.type) && a.type === 'finance').length : 0,
+      canSettle: persona ? actions.filter((a) => pendingActionAllowedForPersona(persona, a.type) && a.type === 'settle').length : 0,
+      obligorAccept: persona ? actions.filter((a) => pendingActionAllowedForPersona(persona, a.type) && a.type === 'obligor_accept').length : 0,
+      total: persona ? actions.filter((a) => pendingActionAllowedForPersona(persona, a.type)).length : 0,
+    },
     indexerErrors: [asOriginator.error, asObligor.error].filter(Boolean),
   })
 }
