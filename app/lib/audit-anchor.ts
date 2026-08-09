@@ -1,11 +1,10 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { createPublicClient, http, type Hex } from 'viem'
-import { auditPackJsonPath, listAuditPackIds, loadAuditPack } from '@/lib/audit-pack'
+import { listAuditPackIds, loadAuditPack, readAuditPackHash } from '@/lib/audit-pack'
 import { addresses, rpcUrl } from '@/lib/config'
 import { repoRoot } from '@/lib/repo-root'
 import { auditAnchorAbi } from '@/lib/contracts'
-import { execFileSync } from 'node:child_process'
 
 export type OnChainAnchor = {
   anchorId: string
@@ -24,11 +23,8 @@ function loadDeploymentE2e(): Record<string, string> {
 }
 
 function packHashOnDisk(packId: string): Hex | null {
-  const path = auditPackJsonPath(packId)
-  if (!existsSync(path) || !loadAuditPack(packId)) return null
-  // Match cast keccak (audit-pack.mjs source of truth for anchoring)
-  const hash = execFileSync('cast', ['keccak', path], { encoding: 'utf8' }).trim()
-  return hash as Hex
+  if (!loadAuditPack(packId)) return null
+  return readAuditPackHash(packId)
 }
 
 export async function readOnChainAnchors(): Promise<OnChainAnchor[]> {

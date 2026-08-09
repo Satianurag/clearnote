@@ -42,6 +42,9 @@ read_env_file() {
     value="${value%\"}"
     value="${value#\"}"
     if [[ "$name" == "INDEXER_GRAPHQL_URL" && "$value" == *localhost* ]]; then
+      if [[ -n "${INDEXER_PUBLIC_GRAPHQL_URL:-}" ]]; then
+        push_public "INDEXER_GRAPHQL_URL" "$INDEXER_PUBLIC_GRAPHQL_URL"
+      fi
       continue
     fi
     case "$name" in

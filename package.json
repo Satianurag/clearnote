@@ -22,6 +22,7 @@
     "dvp:fill-offer": "bash scripts/fill-dvp-offer.sh",
     "verify:app": "node scripts/verify-app-smoke.mjs",
     "verify:persona": "node scripts/verify-persona-routes.mjs",
+    "indexer:tunnel": "bash scripts/indexer-tunnel.sh",
     "verify:testnet": "node scripts/verify-testnet.mjs",
     "audit:pack": "node scripts/audit-pack.mjs",
     "audit:pack:all": "node scripts/audit-pack.mjs --all",

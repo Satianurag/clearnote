@@ -1,0 +1,64 @@
+# ClearNote Envio indexer — Postgres + Hasura + sync worker on Render.
+# Apply: RENDER_API_KEY=... node scripts/render-deploy-indexer.mjs
+version: "1"
+
+databases:
+  - name: clearnote-indexer-db
+    plan: free
+    region: oregon
+    databaseName: envio_dev
+    user: envio
+
+services:
+  - type: web
+    name: clearnote-hasura
+    runtime: image
+    plan: free
+    region: oregon
+    healthCheckPath: /healthz
+    image:
+      url: docker.io/hasura/graphql-engine:v2.43.0
+    envVars:
+      - key: HASURA_GRAPHQL_DATABASE_URL
+        fromDatabase:
+          name: clearnote-indexer-db
+          property: connectionString
+      - key: HASURA_GRAPHQL_ADMIN_SECRET
+        generateValue: true
+      - key: HASURA_GRAPHQL_ENABLE_CONSOLE
+        value: "true"
+      - key: HASURA_GRAPHQL_STRINGIFY_NUMERIC_TYPES
+        value: "true"
+      - key: HASURA_GRAPHQL_UNAUTHORIZED_ROLE
+        value: public
+      - key: HASURA_GRAPHQL_NO_OF_RETRIES
+        value: "10"
+
+  - type: worker
+    name: clearnote-indexer
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./indexer/Dockerfile
+    dockerContext: ./indexer
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: clearnote-indexer-db
+          property: connectionString
+      - key: HASURA_GRAPHQL_ADMIN_SECRET
+        fromService:
+          name: clearnote-hasura
+          type: web
+          envVarKey: HASURA_GRAPHQL_ADMIN_SECRET
+      - key: HASURA_INTERNAL_HOSTPORT
+        fromService:
+          name: clearnote-hasura
+          type: web
+          property: hostport
+      - key: TUI_OFF
+        value: "true"
+      - key: LOG_LEVEL
+        value: info
+      - key: RUN_DB_SETUP
+        value: "true"

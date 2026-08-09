@@ -1,4 +1,5 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
+import type { Hex } from 'viem'
 import { resolve } from 'node:path'
 import { repoRoot } from '@/lib/repo-root'
 
@@ -85,6 +86,18 @@ export function auditPackJsonPath(packId: string): string {
 
 export function auditPackZipPath(packId: string): string {
   return resolve(repoRoot(), `seed/audit-packs/${packId.toUpperCase()}.zip`)
+}
+
+export function auditPackReadmePath(packId: string): string {
+  return resolve(repoRoot(), `seed/audit-packs/${packId.toUpperCase()}-README.txt`)
+}
+
+/** Canonical packHash from build-time README (portable across local + Vercel). */
+export function readAuditPackHash(packId: string): Hex | null {
+  const readmePath = auditPackReadmePath(packId)
+  if (!existsSync(readmePath)) return null
+  const match = readFileSync(readmePath, 'utf8').match(/packHash \(keccak256 of JSON\): (0x[a-fA-F0-9]{64})/)
+  return match ? (match[1] as Hex) : null
 }
 
 /** On-chain invoiceId (bytes32) values that have a real audit pack on disk. */
