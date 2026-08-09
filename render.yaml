@@ -41,7 +41,7 @@ services:
     region: oregon
     dockerfilePath: ./indexer/Dockerfile
     dockerContext: ./indexer
-    healthCheckPath: /
+    healthCheckPath: /healthz
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -57,6 +57,8 @@ services:
           name: clearnote-hasura
           type: web
           property: hostport
+      - key: HASURA_PUBLIC_URL
+        value: https://clearnote-hasura.onrender.com
       - key: TUI_OFF
         value: "true"
       - key: LOG_LEVEL
