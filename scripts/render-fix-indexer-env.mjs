@@ -24,7 +24,6 @@ const envVars = [
   { key: 'HASURA_GRAPHQL_ADMIN_SECRET', value: hasuraSecret },
   { key: 'HASURA_PUBLIC_URL', value: 'https://clearnote-hasura.onrender.com' },
   { key: 'HASURA_GRAPHQL_ENDPOINT', value: 'https://clearnote-hasura.onrender.com/v1/metadata' },
-  { key: 'HASURA_INTERNAL_HOSTPORT', value: 'clearnote-hasura:10000' },
   { key: 'TUI_OFF', value: 'true' },
   { key: 'LOG_LEVEL', value: 'info' },
   { key: 'RUN_DB_SETUP', value: 'false' },

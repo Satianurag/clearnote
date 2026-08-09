@@ -24,10 +24,10 @@ export ENVIO_INDEXER_PORT=${METRICS_PORT}
 export HASURA_GRAPHQL_ROLE=${HASURA_GRAPHQL_ROLE:-admin}
 
 if [ -z "${HASURA_GRAPHQL_ENDPOINT:-}" ]; then
-  if [ -n "${HASURA_INTERNAL_HOSTPORT:-}" ]; then
-    export HASURA_GRAPHQL_ENDPOINT="http://${HASURA_INTERNAL_HOSTPORT}/v1/metadata"
-  elif [ -n "${HASURA_PUBLIC_URL:-}" ]; then
+  if [ -n "${HASURA_PUBLIC_URL:-}" ]; then
     export HASURA_GRAPHQL_ENDPOINT="${HASURA_PUBLIC_URL%/}/v1/metadata"
+  elif [ -n "${HASURA_INTERNAL_HOSTPORT:-}" ]; then
+    export HASURA_GRAPHQL_ENDPOINT="http://${HASURA_INTERNAL_HOSTPORT}/v1/metadata"
   else
     export HASURA_GRAPHQL_ENDPOINT="http://localhost:8080/v1/metadata"
   fi

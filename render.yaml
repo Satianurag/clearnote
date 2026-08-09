@@ -53,11 +53,8 @@ services:
           name: clearnote-hasura
           type: web
           envVarKey: HASURA_GRAPHQL_ADMIN_SECRET
-      - key: HASURA_INTERNAL_HOSTPORT
-        fromService:
-          name: clearnote-hasura
-          type: web
-          property: hostport
+      - key: HASURA_GRAPHQL_ENDPOINT
+        value: https://clearnote-hasura.onrender.com/v1/metadata
       - key: HASURA_PUBLIC_URL
         value: https://clearnote-hasura.onrender.com
       - key: TUI_OFF
