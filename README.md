@@ -51,7 +51,7 @@ graph TB
     subgraph App["🖥️ ClearNote App · Next.js 16"]
         UI[Product UI<br/>exporter · investor · obligor]
         API[API Routes<br/>SIWE · Safe · Cleanverse proxy]
-        INSPECT[Pre-flight inspect()<br/>reason-code matrix]
+        INSPECT["Pre-flight inspect()<br/>reason-code matrix"]
     end
 
     subgraph OffChain["📦 Off-chain services"]
